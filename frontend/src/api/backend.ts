@@ -23,15 +23,17 @@ export type Me = {
   icon_type: IconType;
   icon_value: string | null;
   avatar_data_url: string | null;
+  language: string | null;
 };
 
 // A profile edit. For icon_type "emoji"/"preset" send icon_value; for "image" send avatar_data_url
-// (a client-resized data URL); "none" clears the icon.
+// (a client-resized data URL); "none" clears the icon. `language` is the saved UI language (e.g. "en").
 export type ProfileUpdate = {
   display_name: string;
   icon_type: IconType;
   icon_value?: string | null;
   avatar_data_url?: string | null;
+  language?: string | null;
 };
 
 export type GameListItem = {

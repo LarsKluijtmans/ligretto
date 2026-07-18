@@ -55,6 +55,10 @@ _PLAYER_COLUMN_DDL = {
         "mysql": "ALTER TABLE player ADD COLUMN avatar_data_url MEDIUMTEXT NULL",
         "default": "ALTER TABLE player ADD COLUMN avatar_data_url TEXT NULL",
     },
+    "language": {
+        "mysql": "ALTER TABLE player ADD COLUMN language VARCHAR(8) NULL",
+        "default": "ALTER TABLE player ADD COLUMN language VARCHAR(8) NULL",
+    },
 }
 
 

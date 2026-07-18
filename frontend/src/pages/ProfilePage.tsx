@@ -7,6 +7,7 @@ import {
   CardContent,
   Divider,
   IconButton,
+  MenuItem,
   Snackbar,
   Stack,
   Tab,
@@ -22,6 +23,8 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../api/backend";
 import type { IconType, Me } from "../api/backend";
 import { AsyncBoundary } from "../components/AsyncBoundary";
+import i18n from "../i18n";
+import { LANGUAGE_LABELS, SUPPORTED_LANGUAGES } from "../locales";
 import { EMOJIS, PRESET_AVATARS } from "../profile/avatars";
 import { PlayerAvatar } from "../profile/PlayerAvatar";
 import { useProfile } from "../profile/ProfileContext";
@@ -58,6 +61,10 @@ function ProfileForm({ me }: { me: Me }) {
   const [iconValue, setIconValue] = useState<string | null>(me.icon_value);
   const [avatarDataUrl, setAvatarDataUrl] = useState<string | null>(me.avatar_data_url);
   const [tab, setTab] = useState<PickerTab>(tabForIcon(me.icon_type));
+  const [language, setLanguage] = useState<string>(me.language ?? i18n.resolvedLanguage ?? "en");
+  // Snapshot the language at mount so the dirty check compares against the SAVED value, not the
+  // live-changing i18n resolvedLanguage (picking a language previews it immediately).
+  const [initialLanguage] = useState<string>(me.language ?? i18n.resolvedLanguage ?? "en");
 
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ severity: "success" | "error"; msg: string } | null>(null);
@@ -77,7 +84,13 @@ function ProfileForm({ me }: { me: Me }) {
     displayName !== (me.display_name ?? "") ||
     iconType !== me.icon_type ||
     iconValue !== me.icon_value ||
-    avatarDataUrl !== me.avatar_data_url;
+    avatarDataUrl !== me.avatar_data_url ||
+    language !== initialLanguage;
+
+  function pickLanguage(lng: string) {
+    setLanguage(lng);
+    void i18n.changeLanguage(lng); // preview immediately + cache to localStorage
+  }
 
   function pickEmoji(emoji: string) {
     setIconType("emoji");
@@ -121,6 +134,7 @@ function ProfileForm({ me }: { me: Me }) {
         icon_type: iconType,
         icon_value: iconType === "emoji" || iconType === "preset" ? iconValue : null,
         avatar_data_url: iconType === "image" ? avatarDataUrl : null,
+        language,
       });
       setMe(updated);
       setToast({ severity: "success", msg: t("profile.saved") });
@@ -164,6 +178,21 @@ function ProfileForm({ me }: { me: Me }) {
               slotProps={{ htmlInput: { maxLength: 255 } }}
               helperText={t("profile.displayNameHelp")}
             />
+
+            <TextField
+              select
+              label={t("language")}
+              value={language}
+              onChange={(e) => pickLanguage(e.target.value)}
+              fullWidth
+              helperText={t("profile.languageHelp")}
+            >
+              {SUPPORTED_LANGUAGES.map((lng) => (
+                <MenuItem key={lng} value={lng}>
+                  {LANGUAGE_LABELS[lng]}
+                </MenuItem>
+              ))}
+            </TextField>
 
             <Divider />
 

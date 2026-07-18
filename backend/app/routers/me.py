@@ -26,6 +26,7 @@ def _me_out(player: Player) -> MeOut:
         icon_type=player.icon_type,
         icon_value=player.icon_value,
         avatar_data_url=player.avatar_data_url,
+        language=player.language,
     )
 
 
@@ -73,6 +74,7 @@ def update_profile(
         icon_type=body.icon_type,
         icon_value=body.icon_value,
         avatar_data_url=body.avatar_data_url,
+        language=body.language,
     )
     log_event(
         "info",

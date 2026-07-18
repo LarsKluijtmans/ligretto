@@ -35,6 +35,16 @@ def test_me_defaults_to_no_icon(app_client):
     assert body["icon_type"] == "none"
     assert body["icon_value"] is None
     assert body["avatar_data_url"] is None
+    assert body["language"] is None
+
+
+def test_update_profile_saves_language(app_client):
+    app_client.get("/api/v1/me")
+    r = app_client.patch("/api/v1/me/profile", json={"display_name": "Alice", "language": "nl"})
+    assert r.status_code == 200
+    assert r.json()["language"] == "nl"
+    # Persisted across a fresh read.
+    assert app_client.get("/api/v1/me").json()["language"] == "nl"
 
 
 def test_update_profile_with_emoji(app_client):

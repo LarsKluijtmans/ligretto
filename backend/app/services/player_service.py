@@ -41,8 +41,10 @@ class PlayerService:
         icon_type: str,
         icon_value: str | None,
         avatar_data_url: str | None,
+        language: str | None,
     ) -> Player:
-        """Full profile update from the profile page: display name + icon (emoji / preset / image).
+        """Full profile update from the profile page: display name + icon (emoji / preset / image)
+        + preferred language.
 
         The icon fields are normalised so exactly one representation is stored — switching to an
         emoji/preset clears any uploaded image, and vice versa — so a stale blob never lingers.
@@ -52,5 +54,6 @@ class PlayerService:
         player.icon_type = icon_type
         player.icon_value = icon_value if icon_type in ("emoji", "preset") else None
         player.avatar_data_url = avatar_data_url if icon_type == "image" else None
+        player.language = language or None
         self.players.save()
         return player

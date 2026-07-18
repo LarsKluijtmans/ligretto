@@ -54,6 +54,10 @@ class Player(Base):
         Text().with_variant(MEDIUMTEXT(), "mysql"), nullable=True, deferred=True
     )
 
+    # Preferred UI language (e.g. "en", "nl"), saved from the profile page so it follows the user
+    # across devices. NULL = never chosen (the client falls back to its own language detection).
+    language: Mapped[str | None] = mapped_column(String(8), nullable=True)
+
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, nullable=False)
 
 

@@ -19,6 +19,10 @@ export const nl: AppResources = {
       history: "Historie",
     },
 
+    menu: {
+      account: "Account",
+    },
+
     dashboard: {
       title: "Mijn spellen",
       subtitle: "Spellen die jij host",
@@ -118,6 +122,7 @@ export const nl: AppResources = {
       subtitle: "Je naam en icoon, zoals andere spelers je zien",
       displayName: "Weergavenaam",
       displayNameHelp: "Wordt getoond op scoreborden en in je spellen.",
+      languageHelp: "Opgeslagen in je profiel en toegepast op elk apparaat.",
       iconTitle: "Jouw icoon",
       removeIcon: "Icoon verwijderen",
       tabEmoji: "Emoji",

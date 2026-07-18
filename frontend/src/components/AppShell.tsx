@@ -5,22 +5,25 @@ import {
   Box,
   BottomNavigation,
   BottomNavigationAction,
-  Button,
   Container,
+  Divider,
   IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
   Paper,
   Stack,
   Toolbar,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { BookOpen, History as HistoryIcon, LayoutGrid, LogOut } from "lucide-react";
+import { BookOpen, History as HistoryIcon, LayoutGrid, LogOut, User } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useBranding } from "../branding/BrandingThemeProvider";
 import { PlayerAvatar } from "../profile/PlayerAvatar";
 import { useProfile } from "../profile/ProfileContext";
-import { LanguageSwitcher } from "./LanguageSwitcher";
 
 // The signed-in shell: a branded top bar, language switch + logout, a routed content area
 // (<Outlet/>), and a mobile-first bottom navigation between the main sections.
@@ -31,6 +34,14 @@ export function AppShell() {
   const { me } = useProfile();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Account dropdown (top-right avatar) — holds Profile + Log out.
+  const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+  const closeMenu = () => setMenuAnchor(null);
+  const go = (to: string) => {
+    closeMenu();
+    navigate(to);
+  };
 
   // Map the current path to the active bottom-nav tab.
   const path = location.pathname;
@@ -66,31 +77,64 @@ export function AppShell() {
               </Typography>
             </Box>
           </Stack>
-          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-            <LanguageSwitcher />
-            <Button color="inherit" startIcon={<LogOut size={18} />} onClick={logout}>
-              <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-                {t("logout")}
-              </Box>
-            </Button>
-            <Tooltip title={t("profile.title")}>
-              <IconButton
-                onClick={() => navigate("/profile")}
-                aria-label={t("profile.title")}
-                sx={{ p: 0.25 }}
-              >
-                {me ? (
-                  <PlayerAvatar
-                    source={me}
-                    size={34}
-                    sx={{ border: "2px solid", borderColor: "rgba(255,255,255,0.7)" }}
-                  />
-                ) : (
-                  <Avatar sx={{ width: 34, height: 34, bgcolor: "secondary.main" }} />
+          <Tooltip title={me?.display_name || t("menu.account")}>
+            <IconButton
+              onClick={(e) => setMenuAnchor(e.currentTarget)}
+              aria-label={t("menu.account")}
+              aria-haspopup="true"
+              aria-expanded={Boolean(menuAnchor)}
+              sx={{ p: 0.25 }}
+            >
+              {me ? (
+                <PlayerAvatar
+                  source={me}
+                  size={34}
+                  sx={{ border: "2px solid", borderColor: "rgba(255,255,255,0.7)" }}
+                />
+              ) : (
+                <Avatar sx={{ width: 34, height: 34, bgcolor: "secondary.main" }} />
+              )}
+            </IconButton>
+          </Tooltip>
+          <Menu
+            anchorEl={menuAnchor}
+            open={Boolean(menuAnchor)}
+            onClose={closeMenu}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+            slotProps={{ paper: { sx: { minWidth: 200, mt: 0.5 } } }}
+          >
+            {me && (
+              <Box sx={{ px: 2, py: 1 }}>
+                <Typography variant="subtitle2" noWrap sx={{ fontWeight: 700 }}>
+                  {me.display_name}
+                </Typography>
+                {me.email && (
+                  <Typography variant="caption" color="text.secondary" noWrap component="div">
+                    {me.email}
+                  </Typography>
                 )}
-              </IconButton>
-            </Tooltip>
-          </Stack>
+              </Box>
+            )}
+            {me && <Divider />}
+            <MenuItem onClick={() => go("/profile")}>
+              <ListItemIcon>
+                <User size={18} />
+              </ListItemIcon>
+              {t("profile.title")}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeMenu();
+                logout();
+              }}
+            >
+              <ListItemIcon>
+                <LogOut size={18} />
+              </ListItemIcon>
+              {t("logout")}
+            </MenuItem>
+          </Menu>
         </Toolbar>
       </AppBar>
 

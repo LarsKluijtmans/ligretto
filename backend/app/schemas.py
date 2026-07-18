@@ -55,6 +55,7 @@ class MeOut(BaseModel):
     icon_type: IconType = "none"
     icon_value: str | None = None
     avatar_data_url: str | None = None
+    language: str | None = None
 
 
 class ProfileUpdateIn(BaseModel):
@@ -62,6 +63,7 @@ class ProfileUpdateIn(BaseModel):
     icon_type: IconType = "none"
     icon_value: str | None = Field(default=None, max_length=64)
     avatar_data_url: str | None = None
+    language: str | None = Field(default=None, max_length=8)
 
     @model_validator(mode="after")
     def _check_icon(self) -> "ProfileUpdateIn":

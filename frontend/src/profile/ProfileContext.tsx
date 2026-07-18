@@ -10,6 +10,7 @@ import {
 import type { ReactNode } from "react";
 import { api } from "../api/backend";
 import type { Me } from "../api/backend";
+import i18n from "../i18n";
 
 // Loads the signed-in player's profile (`GET /me`, which also provisions the row) once for the
 // authenticated app, and exposes it plus a way to update it. The app bar reads it for the avatar;
@@ -41,7 +42,13 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     api
       .getMe(getAccessToken)
       .then((data) => {
-        if (active) setMe(data);
+        if (!active) return;
+        setMe(data);
+        // Apply the saved UI language so it follows the user across devices (overrides the
+        // browser/localStorage detection only when a preference was actually saved).
+        if (data.language && data.language !== i18n.resolvedLanguage) {
+          void i18n.changeLanguage(data.language);
+        }
       })
       .catch((e: unknown) => {
         if (active) setError(e instanceof Error ? e.message : String(e));

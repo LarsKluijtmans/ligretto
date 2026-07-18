@@ -17,6 +17,10 @@ export const en = {
       history: "History",
     },
 
+    menu: {
+      account: "Account",
+    },
+
     dashboard: {
       title: "My games",
       subtitle: "Games you host",
@@ -116,6 +120,7 @@ export const en = {
       subtitle: "Your name and icon, as other players see you",
       displayName: "Display name",
       displayNameHelp: "Shown on scoreboards and in your games.",
+      languageHelp: "Saved to your profile and applied on every device.",
       iconTitle: "Your icon",
       removeIcon: "Remove icon",
       tabEmoji: "Emoji",
