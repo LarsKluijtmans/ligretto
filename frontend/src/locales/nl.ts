@@ -1,0 +1,169 @@
+import type { AppResources } from "./en";
+
+export const nl: AppResources = {
+  app: {
+    title: "Ligretto",
+    tagline: "Scoreteller",
+    logout: "Uitloggen",
+    language: "Taal",
+    loadError: "Er ging iets mis",
+    retry: "Opnieuw",
+    cancel: "Annuleren",
+    save: "Opslaan",
+    back: "Terug",
+    loading: "Laden…",
+
+    nav: {
+      dashboard: "Spellen",
+      rules: "Spelregels",
+      history: "Historie",
+    },
+
+    dashboard: {
+      title: "Mijn spellen",
+      subtitle: "Spellen die jij host",
+      newGame: "Nieuw spel",
+      empty: "Nog geen spellen. Begin je eerste!",
+      emptyCta: "Nieuw spel",
+      round: "Ronde {{n}}",
+      players_one: "{{count}} speler",
+      players_other: "{{count}} spelers",
+      leader: "Koploper: {{name}}",
+      noLeader: "Nog geen score",
+      open: "Openen",
+      target_rounds: "Eerste bij {{n}} rondes",
+      target_points: "Race naar {{n}} punten",
+    },
+
+    status: {
+      active: "Bezig",
+      completed: "Afgerond",
+      abandoned: "Gestaakt",
+    },
+
+    newGame: {
+      title: "Nieuw spel",
+      nameLabel: "Naam van het spel (optioneel)",
+      namePlaceholder: "Ligretto op vrijdagavond",
+      targetLabel: "Speel tot",
+      targetRounds: "Een aantal rondes",
+      targetPoints: "Een puntentotaal",
+      targetValueRounds: "Rondes",
+      targetValuePoints: "Doelpunten",
+      players: "Spelers",
+      playersHint: "Voeg 2 tot 10 spelers toe.",
+      addMe: "Voeg mij toe",
+      addGuest: "Gast toevoegen",
+      guestName: "Naam gast",
+      you: "Jij",
+      seat: "Plek {{n}}",
+      remove: "Verwijderen",
+      create: "Spel aanmaken",
+      needTwo: "Voeg minstens 2 spelers toe.",
+      tooMany: "Een spel heeft maximaal 10 spelers.",
+      meAlready: "Je zit al in dit spel.",
+    },
+
+    game: {
+      round: "Ronde {{n}}",
+      rounds: "Rondes",
+      total: "Totaal",
+      standings: "Stand",
+      leader: "Koploper",
+      winner: "Winnaar",
+      noRounds: "Nog geen rondes gescoord. Voer hieronder de eerste ronde in.",
+      addRound: "Ronde toevoegen",
+      newRound: "Invoer ronde {{n}}",
+      centre: "Naar midden",
+      stack: "Stapel over",
+      net: "Netto",
+      score: "Score",
+      directNet: "Voer nettoscore direct in",
+      byCounts: "Op kaartaantallen",
+      submitRound: "Ronde opslaan",
+      editRound: "Ronde {{n}} bewerken",
+      finish: "Spel afronden",
+      abandon: "Staken",
+      abandonConfirm: "Dit spel staken? Het wordt zacht verwijderd.",
+      finishConfirm: "Het spel afronden en de eindstand vastzetten?",
+      targetReached: "Doel bereikt — spel afronden?",
+      finishNow: "Nu afronden",
+      keepPlaying: "Doorspelen",
+      completedNote: "Dit spel is afgerond.",
+      abandonedNote: "Dit spel is gestaakt.",
+      winnerIs: "🏆 {{name}} wint!",
+      seat: "Plek",
+      player: "Speler",
+    },
+
+    history: {
+      title: "Historie",
+      subtitle: "Jouw spellen, nieuwste eerst",
+      empty: "Nog geen spellen in je historie.",
+      loadMore: "Meer laden",
+      open: "Details",
+    },
+
+    stats: {
+      title: "Jouw statistieken",
+      gamesPlayed: "Spellen",
+      wins: "Overwinningen",
+      winRate: "Winstpercentage",
+      avgScore: "Gem. score",
+      bestRound: "Beste ronde",
+    },
+
+    rules: {
+      title: "Zo speel je Ligretto",
+      intro:
+        "Ligretto is een snel, chaotisch realtime kaartspel. Iedereen speelt tegelijk — er zijn geen beurten. Wees de eerste die zijn Ligretto-stapel leegspeelt op de gedeelde middenstapels.",
+      sections: [
+        {
+          heading: "Voorbereiding",
+          items: [
+            "Elke speler pakt één gekleurd kaartspel van 40 kaarten (genummerd 1–10 in vier kleuren).",
+            "Schud je eigen spel. Leg een open Ligretto-stapel van 10 kaarten neer, en een rij van 3 open kaarten ernaast.",
+            "Houd de rest als je trekstapel vast.",
+          ],
+        },
+        {
+          heading: "Spelen (allemaal tegelijk)",
+          items: [
+            "Elke kaart met nummer 1 begint een nieuwe stapel in het gedeelde midden. Bouw elke middenstapel oplopend op (1, 2, 3 …), ongeacht de kleur.",
+            "Speel kaarten vanuit je drie open rijkaarten en van de bovenkant van je Ligretto-stapel.",
+            "Vul je rij aan uit je trekstapel zodat je altijd drie kaarten beschikbaar houdt (draai de trekstapel per drie om).",
+            "Er zijn geen beurten — speel zo snel mogelijk. Snelheid is alles.",
+          ],
+        },
+        {
+          heading: "Een ronde eindigen",
+          items: [
+            "Een ronde eindigt zodra één speler zijn Ligretto-stapel leeg heeft en “Ligretto!” roept.",
+            "Iedereen stopt onmiddellijk.",
+          ],
+        },
+        {
+          heading: "Punten tellen",
+          items: [
+            "Tel de kaarten die je in de middenstapels hebt gespeeld — dat is je positieve score.",
+            "Tel dan de kaarten die nog in je Ligretto-stapel liggen — elke kaart kost je 2 punten.",
+            "Rondescore = kaarten naar het midden − 2 × kaarten over in je Ligretto-stapel.",
+            "Je totaal is de som van je rondescores over het hele spel.",
+          ],
+        },
+        {
+          heading: "Winnen",
+          items: [
+            "Spreek vooraf een doel af: een aantal rondes, of een puntentotaal.",
+            "Doel in rondes: het spel eindigt na dat aantal rondes — hoogste totaal wint.",
+            "Doel in punten: de eerste speler die het doeltotaal bereikt wint.",
+            "Gelijke standen mogen — het scorebord markeert elke koploper.",
+          ],
+        },
+      ],
+      scoringExampleTitle: "Rekenvoorbeeld",
+      scoringExample:
+        "Je speelde 23 kaarten naar het midden en had nog 2 kaarten in je Ligretto-stapel: 23 − 2 × 2 = 19 punten voor de ronde.",
+    },
+  },
+};

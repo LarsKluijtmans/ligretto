@@ -20,3 +20,8 @@ __pycache__/
 # OS / editor
 .DS_Store
 Thumbs.db
+
+# SQLite app DB
+*.db
+*.sqlite
+*.sqlite3

@@ -1,0 +1,17 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7
+pydantic-settings>=2.3
+python-jose[cryptography]>=3.3
+httpx>=0.27
+sqlalchemy>=2.0
+pymysql>=1.1        # MySQL driver for prod (mysql+pymysql://...)
+
+# --- test-only ---
+pytest>=8.0
+
+# The platform's Python admin SDK (M2M auth + users/logs/usage).
+# If 0.2.0 isn't on PyPI yet, install it from the monorepo instead:
+#   pip install -e ../auth/packages/python/admin-sdk-python
+# (scripts/use-local-sdks.ps1 does this for you).
+lars-kluijtmans-admin-sdk==0.2.0
