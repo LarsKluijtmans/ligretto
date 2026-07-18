@@ -111,6 +111,25 @@ export const en = {
       bestRound: "Best round",
     },
 
+    profile: {
+      title: "Profile",
+      subtitle: "Your name and icon, as other players see you",
+      displayName: "Display name",
+      displayNameHelp: "Shown on scoreboards and in your games.",
+      iconTitle: "Your icon",
+      removeIcon: "Remove icon",
+      tabEmoji: "Emoji",
+      tabAvatars: "Avatars",
+      tabPhoto: "Photo",
+      choosePhoto: "Upload a photo",
+      changePhoto: "Change photo",
+      photoHint: "Square works best — it’s resized and cropped on your device before uploading.",
+      photoError: "Couldn’t read that image. Try another file.",
+      nameRequired: "Enter a display name.",
+      saved: "Profile saved",
+      saveError: "Couldn’t save your profile",
+    },
+
     rules: {
       title: "How to play Ligretto",
       intro:

@@ -30,6 +30,71 @@ def test_update_profile(app_client):
     assert r.json()["display_name"] == "Alice A."
 
 
+def test_me_defaults_to_no_icon(app_client):
+    body = app_client.get("/api/v1/me").json()
+    assert body["icon_type"] == "none"
+    assert body["icon_value"] is None
+    assert body["avatar_data_url"] is None
+
+
+def test_update_profile_with_emoji(app_client):
+    app_client.get("/api/v1/me")
+    r = app_client.patch(
+        "/api/v1/me/profile",
+        json={"display_name": "Alice", "icon_type": "emoji", "icon_value": "🦊"},
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body["icon_type"] == "emoji"
+    assert body["icon_value"] == "🦊"
+    assert body["avatar_data_url"] is None
+    # Persisted across a fresh read.
+    assert app_client.get("/api/v1/me").json()["icon_value"] == "🦊"
+
+
+def test_update_profile_image_then_switch_clears_blob(app_client):
+    app_client.get("/api/v1/me")
+    data_url = (
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lE"
+        "QVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    )
+    r = app_client.patch(
+        "/api/v1/me/profile",
+        json={"display_name": "Alice", "icon_type": "image", "avatar_data_url": data_url},
+    )
+    assert r.status_code == 200
+    assert r.json()["icon_type"] == "image"
+    assert r.json()["avatar_data_url"] == data_url
+
+    # Switching to an emoji clears the stored image so no stale blob lingers.
+    r2 = app_client.patch(
+        "/api/v1/me/profile",
+        json={"display_name": "Alice", "icon_type": "emoji", "icon_value": "🐼"},
+    )
+    assert r2.status_code == 200
+    assert r2.json()["icon_type"] == "emoji"
+    assert r2.json()["avatar_data_url"] is None
+
+
+def test_update_profile_rejects_bad_icon(app_client):
+    app_client.get("/api/v1/me")
+    # emoji type with no value
+    assert (
+        app_client.patch(
+            "/api/v1/me/profile", json={"display_name": "A", "icon_type": "emoji"}
+        ).status_code
+        == 422
+    )
+    # image type with a non-image data url
+    assert (
+        app_client.patch(
+            "/api/v1/me/profile",
+            json={"display_name": "A", "icon_type": "image", "avatar_data_url": "notadataurl"},
+        ).status_code
+        == 422
+    )
+
+
 def test_create_game_enforces_min_players(app_client, create_game_payload):
     r = app_client.post("/api/v1/games", json=create_game_payload(players=1))
     assert r.status_code == 400

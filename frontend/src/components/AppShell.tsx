@@ -7,15 +7,19 @@ import {
   BottomNavigationAction,
   Button,
   Container,
+  IconButton,
   Paper,
   Stack,
   Toolbar,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { BookOpen, History as HistoryIcon, LayoutGrid, LogOut } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useBranding } from "../branding/BrandingThemeProvider";
+import { PlayerAvatar } from "../profile/PlayerAvatar";
+import { useProfile } from "../profile/ProfileContext";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 
 // The signed-in shell: a branded top bar, language switch + logout, a routed content area
@@ -24,6 +28,7 @@ export function AppShell() {
   const { t } = useTranslation("app");
   const { logout } = useAuth();
   const { branding } = useBranding();
+  const { me } = useProfile();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -68,6 +73,23 @@ export function AppShell() {
                 {t("logout")}
               </Box>
             </Button>
+            <Tooltip title={t("profile.title")}>
+              <IconButton
+                onClick={() => navigate("/profile")}
+                aria-label={t("profile.title")}
+                sx={{ p: 0.25 }}
+              >
+                {me ? (
+                  <PlayerAvatar
+                    source={me}
+                    size={34}
+                    sx={{ border: "2px solid", borderColor: "rgba(255,255,255,0.7)" }}
+                  />
+                ) : (
+                  <Avatar sx={{ width: 34, height: 34, bgcolor: "secondary.main" }} />
+                )}
+              </IconButton>
+            </Tooltip>
           </Stack>
         </Toolbar>
       </AppBar>

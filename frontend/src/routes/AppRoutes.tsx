@@ -4,6 +4,7 @@ import { DashboardPage } from "../pages/DashboardPage";
 import { GamePage } from "../pages/GamePage";
 import { HistoryPage } from "../pages/HistoryPage";
 import { NewGamePage } from "../pages/NewGamePage";
+import { ProfilePage } from "../pages/ProfilePage";
 import { RulesPage } from "../pages/RulesPage";
 
 // All signed-in routes render inside the AppShell layout (top bar + bottom nav + <Outlet/>).
@@ -16,6 +17,7 @@ export function AppRoutes() {
         <Route path="games/:id" element={<GamePage />} />
         <Route path="rules" element={<RulesPage />} />
         <Route path="history" element={<HistoryPage />} />
+        <Route path="profile" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

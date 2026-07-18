@@ -16,8 +16,10 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    Text,
     UniqueConstraint,
 )
+from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
@@ -34,6 +36,24 @@ class Player(Base):
     sub: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     display_name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
     email: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
+    # Profile icon. One of {"none","emoji","preset","image"}:
+    #   emoji  -> icon_value holds the emoji character (e.g. "🦊")
+    #   preset -> icon_value holds a bundled-avatar id (e.g. "aurora")
+    #   image  -> avatar_data_url holds a client-resized `data:image/*;base64,...` URL
+    # server_default keeps the ALTER that adds this column to the existing MySQL table valid for the
+    # rows already there (see database._reconcile_player_columns).
+    icon_type: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="none", server_default="none"
+    )
+    icon_value: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    # Uploaded avatars are stored inline as a small (client-capped) data URL. MEDIUMTEXT on MySQL so a
+    # photo comfortably fits; deferred so this blob is NOT loaded on ordinary player reads (game
+    # standings etc.) — only when the profile endpoint serializes it.
+    avatar_data_url: Mapped[str | None] = mapped_column(
+        Text().with_variant(MEDIUMTEXT(), "mysql"), nullable=True, deferred=True
+    )
+
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, nullable=False)
 
 

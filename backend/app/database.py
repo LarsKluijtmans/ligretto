@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from .config import settings
@@ -34,6 +34,43 @@ def init_db() -> None:
     from . import models  # noqa: F401
 
     Base.metadata.create_all(bind=engine)
+    _reconcile_player_columns()
+
+
+# Columns added to `player` after its first release. `create_all` only ever creates MISSING TABLES —
+# it never adds a column to a table that already exists — so the live MySQL `player` table (populated
+# the moment anyone logged in) would silently lack these and every read would 1054. Add them
+# idempotently on startup, mirroring the platform's create_all-reconcile pattern. On a fresh SQLite
+# DB (dev/tests) create_all already made them, so this is a no-op there.
+_PLAYER_COLUMN_DDL = {
+    "icon_type": {
+        "mysql": "ALTER TABLE player ADD COLUMN icon_type VARCHAR(16) NOT NULL DEFAULT 'none'",
+        "default": "ALTER TABLE player ADD COLUMN icon_type VARCHAR(16) NOT NULL DEFAULT 'none'",
+    },
+    "icon_value": {
+        "mysql": "ALTER TABLE player ADD COLUMN icon_value VARCHAR(64) NULL",
+        "default": "ALTER TABLE player ADD COLUMN icon_value VARCHAR(64) NULL",
+    },
+    "avatar_data_url": {
+        "mysql": "ALTER TABLE player ADD COLUMN avatar_data_url MEDIUMTEXT NULL",
+        "default": "ALTER TABLE player ADD COLUMN avatar_data_url TEXT NULL",
+    },
+}
+
+
+def _reconcile_player_columns() -> None:
+    insp = inspect(engine)
+    if "player" not in insp.get_table_names():
+        return
+    existing = {c["name"] for c in insp.get_columns("player")}
+    missing = [name for name in _PLAYER_COLUMN_DDL if name not in existing]
+    if not missing:
+        return
+    dialect = engine.dialect.name
+    with engine.begin() as conn:
+        for name in missing:
+            stmt = _PLAYER_COLUMN_DDL[name].get(dialect, _PLAYER_COLUMN_DDL[name]["default"])
+            conn.execute(text(stmt))
 
 
 def get_db() -> Iterator[Session]:

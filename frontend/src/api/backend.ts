@@ -14,10 +14,24 @@ export type PlayerKind = "account" | "guest";
 // ---------------------------------------------------------------------------------------------
 // Response shapes
 // ---------------------------------------------------------------------------------------------
+export type IconType = "none" | "emoji" | "preset" | "image";
+
 export type Me = {
   sub: string;
   display_name: string | null;
   email: string | null;
+  icon_type: IconType;
+  icon_value: string | null;
+  avatar_data_url: string | null;
+};
+
+// A profile edit. For icon_type "emoji"/"preset" send icon_value; for "image" send avatar_data_url
+// (a client-resized data URL); "none" clears the icon.
+export type ProfileUpdate = {
+  display_name: string;
+  icon_type: IconType;
+  icon_value?: string | null;
+  avatar_data_url?: string | null;
 };
 
 export type GameListItem = {
@@ -134,10 +148,10 @@ export const api = {
   // Identity — provisions a player row on first call, keyed by sub.
   getMe: (getToken: TokenGetter) => request<Me>("/api/v1/me", getToken),
 
-  updateProfile: (getToken: TokenGetter, display_name: string) =>
+  updateProfile: (getToken: TokenGetter, update: ProfileUpdate) =>
     request<Me>("/api/v1/me/profile", getToken, {
       method: "PATCH",
-      body: JSON.stringify({ display_name }),
+      body: JSON.stringify(update),
     }),
 
   // Games

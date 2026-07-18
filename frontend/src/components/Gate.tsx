@@ -4,6 +4,7 @@ import { Box, CircularProgress } from "@mui/material";
 import { BrowserRouter } from "react-router-dom";
 import { authConfig } from "../authConfig";
 import { useBranding } from "../branding/BrandingThemeProvider";
+import { ProfileProvider } from "../profile/ProfileContext";
 import { AppRoutes } from "../routes/AppRoutes";
 
 // Decides what to render based on auth state: a spinner while resolving, the embedded
@@ -38,8 +39,10 @@ export function Gate() {
   }
 
   return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
+    <ProfileProvider>
+      <BrowserRouter>
+        <AppRoutes />
+      </BrowserRouter>
+    </ProfileProvider>
   );
 }

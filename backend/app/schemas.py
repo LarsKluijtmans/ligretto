@@ -4,7 +4,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class Profile(BaseModel):
@@ -41,14 +41,40 @@ class Ok(BaseModel):
 
 # --- Profile ---------------------------------------------------------------------
 
+IconType = Literal["none", "emoji", "preset", "image"]
+
+# An uploaded avatar rides inline as a base64 data URL. The client resizes to a small square before
+# sending, so this ceiling (~512 KB of image after base64) is only an abuse guard, not the norm.
+_MAX_AVATAR_DATA_URL = 700_000
+
+
 class MeOut(BaseModel):
     sub: str
     display_name: str
     email: str | None = None
+    icon_type: IconType = "none"
+    icon_value: str | None = None
+    avatar_data_url: str | None = None
 
 
 class ProfileUpdateIn(BaseModel):
     display_name: str = Field(min_length=1, max_length=255)
+    icon_type: IconType = "none"
+    icon_value: str | None = Field(default=None, max_length=64)
+    avatar_data_url: str | None = None
+
+    @model_validator(mode="after")
+    def _check_icon(self) -> "ProfileUpdateIn":
+        if self.icon_type in ("emoji", "preset"):
+            if not (self.icon_value and self.icon_value.strip()):
+                raise ValueError(f"icon_value is required when icon_type is '{self.icon_type}'")
+        elif self.icon_type == "image":
+            url = self.avatar_data_url
+            if not url or not url.startswith("data:image/"):
+                raise ValueError("avatar_data_url must be a 'data:image/...' URL when icon_type is 'image'")
+            if len(url) > _MAX_AVATAR_DATA_URL:
+                raise ValueError("avatar image is too large")
+        return self
 
 
 # --- Games -----------------------------------------------------------------------

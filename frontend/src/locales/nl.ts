@@ -113,6 +113,25 @@ export const nl: AppResources = {
       bestRound: "Beste ronde",
     },
 
+    profile: {
+      title: "Profiel",
+      subtitle: "Je naam en icoon, zoals andere spelers je zien",
+      displayName: "Weergavenaam",
+      displayNameHelp: "Wordt getoond op scoreborden en in je spellen.",
+      iconTitle: "Jouw icoon",
+      removeIcon: "Icoon verwijderen",
+      tabEmoji: "Emoji",
+      tabAvatars: "Avatars",
+      tabPhoto: "Foto",
+      choosePhoto: "Foto uploaden",
+      changePhoto: "Foto wijzigen",
+      photoHint: "Vierkant werkt het best — de foto wordt op je apparaat verkleind en bijgesneden vóór uploaden.",
+      photoError: "Kon die afbeelding niet lezen. Probeer een ander bestand.",
+      nameRequired: "Voer een weergavenaam in.",
+      saved: "Profiel opgeslagen",
+      saveError: "Kon je profiel niet opslaan",
+    },
+
     rules: {
       title: "Zo speel je Ligretto",
       intro:
