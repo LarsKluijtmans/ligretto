@@ -1,0 +1,41 @@
+# Ligretto — deploy stack. SAME-ORIGIN: the web container's nginx proxies /api -> the backend, so the
+# whole app is one public hostname (no separate api host, no CORS). It reuses the PLATFORM's Cloudflare
+# tunnel via the co-locate override (docker-compose.override.yml) — add ONE public hostname in the
+# platform tunnel:  ligretto.<domain>  ->  http://ligretto-web:80
+#
+# Build the SPA on the host FIRST (the unpublished SDKs resolve from ../auth), then bring it up:
+#   cd frontend && npm ci && npm run build && cd ..
+#   docker compose up -d --build
+name: ligretto
+
+services:
+  ligretto-backend:
+    build: ./backend
+    image: ligretto-backend
+    restart: unless-stopped
+    environment:
+      APP_NAME: ligretto
+      # Platform services. TOKEN_ISSUER stays the PUBLIC login URL (the `iss` the browser token pins);
+      # the actual call URLs are overridden to internal names for co-locate (see override).
+      LOGIN_API_URL: ${PLATFORM_LOGIN_API_URL:-https://auth.aangifteportal.nl}
+      AUTH_API_URL: ${PLATFORM_AUTH_API_URL:-https://auth-api.aangifteportal.nl}
+      LOGS_API_URL: ${PLATFORM_LOGS_API_URL:-https://logs-api.aangifteportal.nl}
+      TOKEN_ISSUER: ${PLATFORM_LOGIN_API_URL:-https://auth.aangifteportal.nl}
+      M2M_CLIENT_ID: ${M2M_CLIENT_ID:-}
+      M2M_CLIENT_SECRET: ${M2M_CLIENT_SECRET:-}
+      LOG_CATEGORY: ligretto
+      CORS_ORIGINS: ${PUBLIC_APP_URL:-https://ligretto.aangifteportal.nl}
+      # App DB on the platform's MySQL. Co-locate reaches it as mysql:3306 (the ligretto DB + user
+      # already exist). e.g. mysql+pymysql://ligretto:<pw>@mysql:3306/ligretto
+      DATABASE_URL: ${DATABASE_URL:-}
+    ports:
+      - "9220:9000"   # local debug only; web + tunnel reach ligretto-backend:9000 internally
+
+  ligretto-web:
+    build: ./frontend
+    image: ligretto-web
+    restart: unless-stopped
+    depends_on:
+      - ligretto-backend
+    ports:
+      - "9230:80"     # local debug only; the platform tunnel maps ligretto.<domain> -> ligretto-web:80

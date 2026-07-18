@@ -1,0 +1,35 @@
+# CO-LOCATE topology — auto-merged by `docker compose`. Runs Ligretto ON the platform's Docker network
+# (`platform_default`) so the backend reaches mysql:3306 and login-api:8010 by INTERNAL name, and the
+# PLATFORM's cloudflared can route ligretto.<domain> to ligretto-web. Requires the platform stack
+# (compose project `platform`) to be UP (it owns `platform_default`).
+#
+#   docker compose up -d --build
+#
+# Then, once, in Cloudflare Zero Trust > the platform tunnel > Public Hostnames, add:
+#   ligretto.aangifteportal.nl  ->  http://ligretto-web:80
+services:
+  ligretto-backend:
+    environment:
+      # Reach the platform over the INTERNAL network (no public round-trip). TOKEN_ISSUER is NOT
+      # overridden — it stays the public https://auth... from the base compose (the iss the token pins).
+      LOGIN_API_URL: http://login-api:8010
+      AUTH_API_URL: http://auth-api:8050
+      LOGS_API_URL: http://logs-api:8030
+    networks:
+      default: {}
+      platform:
+        aliases: [ ligretto-backend ]
+    mem_limit: 512m
+
+  ligretto-web:
+    networks:
+      default: {}
+      platform:
+        aliases: [ ligretto-web ]
+    mem_limit: 128m
+
+networks:
+  # The platform's network, joined as external so the two stacks share DNS. Platform stack must be up.
+  platform:
+    external: true
+    name: platform_default

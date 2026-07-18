@@ -16,6 +16,9 @@ __pycache__/
 .env
 .env.*
 !.env.example
+# frontend/.env.production holds ONLY public build-time values (public PKCE client_id + URLs — the same
+# values baked into the shipped JS bundle), so it is committed for a reproducible prod build.
+!.env.production
 
 # OS / editor
 .DS_Store
