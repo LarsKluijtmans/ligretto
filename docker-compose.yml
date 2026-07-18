@@ -1,11 +1,15 @@
-# Ligretto — deploy stack. SAME-ORIGIN: the web container's nginx proxies /api -> the backend, so the
-# whole app is one public hostname (no separate api host, no CORS). It reuses the PLATFORM's Cloudflare
-# tunnel via the co-locate override (docker-compose.override.yml) — add ONE public hostname in the
-# platform tunnel:  ligretto.<domain>  ->  http://ligretto-web:80
+# Ligretto — deploy stack on larskluijtmans.com. SPLIT-ORIGIN: the SPA is served at
+# ligretto.larskluijtmans.com and calls its API directly at ligrettoapi.larskluijtmans.com, so the
+# backend allows the frontend origin via CORS (see CORS_ORIGINS). Ligretto has its OWN Cloudflare tunnel
+# (ligretto-cloudflared, profile "tunnel", TUNNEL_TOKEN in .env), separate from the platform tunnel. It
+# still co-locates on the platform Docker network (override) so the backend reaches mysql + login-api by
+# internal name. Configure the tunnel's Public Hostnames ONCE in Cloudflare Zero Trust:
+#   ligretto.larskluijtmans.com    -> http://ligretto-web:80
+#   ligrettoapi.larskluijtmans.com -> http://ligretto-backend:9000
 #
 # Build the SPA on the host FIRST (the unpublished SDKs resolve from ../auth), then bring it up:
 #   cd frontend && npm ci && npm run build && cd ..
-#   docker compose up -d --build
+#   docker compose --profile tunnel up -d --build
 name: ligretto
 
 services:
@@ -24,9 +28,10 @@ services:
       M2M_CLIENT_ID: ${M2M_CLIENT_ID:-}
       M2M_CLIENT_SECRET: ${M2M_CLIENT_SECRET:-}
       LOG_CATEGORY: ligretto
-      # Same-origin in prod (nginx proxies /api), so this is mostly belt-and-braces; the local origins
-      # let the dev frontend (:5173) and the local prod build (:9230) call the backend cross-origin too.
-      CORS_ORIGINS: ${CORS_ORIGINS:-https://ligretto.aangifteportal.nl,http://localhost:5173,http://127.0.0.1:5173,http://localhost:9230,http://127.0.0.1:9230}
+      # Split-origin in prod: the SPA at ligretto.larskluijtmans.com calls this backend cross-origin at
+      # ligrettoapi.larskluijtmans.com, so the frontend origin MUST be allowed. Local origins let the dev
+      # frontend (:5173) and the local prod build (:9230) call the backend too.
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://ligretto.larskluijtmans.com,http://localhost:5173,http://127.0.0.1:5173,http://localhost:9230,http://127.0.0.1:9230}
       # App DB on the platform's MySQL. Co-locate reaches it as mysql:3306 (the ligretto DB + user
       # already exist). e.g. mysql+pymysql://ligretto:<pw>@mysql:3306/ligretto
       DATABASE_URL: ${DATABASE_URL:-}
@@ -40,4 +45,17 @@ services:
     depends_on:
       - ligretto-backend
     ports:
-      - "9230:80"     # local debug only; the platform tunnel maps ligretto.<domain> -> ligretto-web:80
+      - "9230:80"     # local debug only; the tunnel maps ligretto.larskluijtmans.com -> ligretto-web:80
+
+  # --- Public exposure on larskluijtmans.com (opt-in: --profile tunnel) --------------------------
+  # Ligretto's OWN Cloudflare tunnel connector (separate from the platform's). It shares this stack's
+  # default network, so it reaches the app by compose name — target ligretto-web:80 / ligretto-backend:9000
+  # in the tunnel's Public Hostnames (Cloudflare Zero Trust). TUNNEL_TOKEN lives in .env (gitignored).
+  ligretto-cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    profiles: ["tunnel"]
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN:-}
+    depends_on:
+      - ligretto-web
+      - ligretto-backend
