@@ -1,0 +1,11 @@
+project_type: full-stack-web
+initialized_at: "2026-07-18T17:41:43Z"
+name: ligretto-scorekeeper
+summary: >
+  A mobile-first web app to look up the Ligretto card game + its rules, sign in, create/host a game,
+  add players, and keep score round-by-round with the real Ligretto scoring model, plus a browsable
+  history of every game played. Built ON the auth platform (react-login PKCE identity); the app owns
+  its own database of games/players/scores.
+builds_on:
+  auth_platform: "../auth"          # login-api (JWKS/JWT), react-login (PKCE), admin SDK (M2M)
+  pattern: "app-starter / Aangifte Portal — embedded react-login + backend JWKS-validate; app DB owns app data"
