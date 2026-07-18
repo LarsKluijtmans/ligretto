@@ -9,3 +9,7 @@ summary: >
 builds_on:
   auth_platform: "../auth"          # login-api (JWKS/JWT), react-login (PKCE), admin SDK (M2M)
   pattern: "app-starter / Aangifte Portal — embedded react-login + backend JWKS-validate; app DB owns app data"
+clients:                            # two clients, one backend
+  - "ligretto-web    — React 19 + Vite + MUI (react-login)"
+  - "ligretto-mobile — React Native + Expo (react-auth)"
+backend: "ligretto-api — FastAPI + SQLAlchemy (Controllers -> Services -> Repositories)"

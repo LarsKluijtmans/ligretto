@@ -21,5 +21,10 @@ Global index (single-file mode). Intent **001-ligretto-scorekeeper**. Status leg
 | S-005-1 | 005 history-and-stats | 006 | History APIs | ⬜ |
 | S-005-2 | 005 history-and-stats | 006 | History UI | ⬜ |
 | S-005-3 | 005 history-and-stats | 006 | Player stats (secondary) | ⬜ |
+| S-006-1 | 006 mobile-app | 007 | Mobile scaffold + auth + shell (Expo/RN) | ⬜ |
+| S-006-2 | 006 mobile-app | 008 | Rules + games (mobile) | ⬜ |
+| S-006-3 | 006 mobile-app | 008 | Scoreboard + round entry (mobile) | ⬜ |
+| S-006-4 | 006 mobile-app | 009 | History + stats (mobile) | ⬜ |
 
-**Totals:** 5 units · 17 stories · 6 bolts.
+**Totals:** 6 units · 21 stories · 9 bolts. (Backend + web = bolts 001–006; mobile = bolts 007–009.)
+

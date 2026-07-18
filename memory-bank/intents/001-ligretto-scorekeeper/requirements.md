@@ -81,9 +81,14 @@ The app does NOT simulate play — it records the two counts per player per roun
 - **NFR-1 — Auth model.** Backend validates login-api JWTs locally against cached JWKS (no per-request
   call to login-api); identity from `sub`; audience/issuer verified per the platform's integration guide.
   Reuses `react-login` on the frontend and the platform's JWKS on the backend (like Aangifte Portal).
-- **NFR-2 — Tech stack.** Frontend: React 19 + TypeScript + Vite + MUI, embedded `@lars-kluijtmans/react-login`.
-  Backend: FastAPI + SQLAlchemy, Controllers → Services → Repositories layering (mirrors the platform
-  services). DB: SQLite for local dev, MySQL for prod (reuse the platform MySQL instance is an option).
+- **NFR-2 — Tech stack (two clients, one backend).**
+  - **Web** (`ligretto-web`): React 19 + TypeScript + Vite + MUI, embedded `@lars-kluijtmans/react-login`.
+  - **Mobile** (`ligretto-mobile`): React Native + Expo (mirrors the platform's `management-mobile`),
+    auth via `@lars-kluijtmans/react-auth` mobile PKCE, branding-aware theming.
+  - **Backend** (`ligretto-api`, shared by both): FastAPI + SQLAlchemy, Controllers → Services →
+    Repositories (mirrors the platform services). DB: SQLite (dev) / MySQL (prod).
+  - Both clients consume the SAME `/api/v1` contract; the scoring engine + isolation are server-side so
+    the clients stay thin and always agree.
 - **NFR-3 — Data isolation (default-deny).** Every query is scoped to the caller: a user sees only games
   they host or are a linked player in. Enforced in repositories (row-level), never trusting client input
   for ownership.

@@ -2,16 +2,19 @@
 
 **Generated:** 2026-07-18T17:41:43Z
 
-Five vertical units. Dependency order: **001 → 002 → 003 → 004 → 005** (002 is independent of 003+ and
-can be built any time after 001).
+**Two clients, one backend.** The app has a **website** (`ligretto-web`, units 001–005) AND a **mobile
+app** (`ligretto-mobile`, unit 006) — both consume the same `ligretto-api`. Units 001–005 build the
+backend + the web client; unit 006 adds the native mobile client over the already-built API. Six vertical
+units. Dependency order: **001 → 002 → 003 → 004 → 005**, then **006** (needs the 003/004 API).
 
-| Unit | Name | Delivers (FR) | Depends on |
-|---|---|---|---|
-| 001 | app-foundation | FR-1, FR-2, FR-14 (shell) | — |
-| 002 | rules | FR-3, FR-14 | 001 |
-| 003 | game-lifecycle | FR-4, FR-5, FR-10, FR-11 | 001 |
-| 004 | scoring | FR-6, FR-7, FR-8, FR-9 | 003 |
-| 005 | history-and-stats | FR-12, FR-13 | 003, 004 |
+| Unit | Name | Client | Delivers (FR) | Depends on |
+|---|---|---|---|---|
+| 001 | app-foundation | web + api | FR-1, FR-2, FR-14 (shell) | — |
+| 002 | rules | web | FR-3, FR-14 | 001 |
+| 003 | game-lifecycle | web + api | FR-4, FR-5, FR-10, FR-11 | 001 |
+| 004 | scoring | web + api | FR-6, FR-7, FR-8, FR-9 | 003 |
+| 005 | history-and-stats | web + api | FR-12, FR-13 | 003, 004 |
+| 006 | mobile-app | mobile | FR-1–FR-14 (native client) | 003, 004 (API) |
 
 ---
 
@@ -84,3 +87,25 @@ Read-side over games/scores.
   the full round grid. *AC:* browse + open any past game.
 - **S-005-3 — Player stats (secondary).** `GET /api/v1/stats/me` — games played, wins, win rate, average
   score, best single round — + a stats screen. *AC:* aggregates match the underlying games.
+
+## Unit 006 — mobile-app
+A native mobile client (React Native + Expo, mirroring the platform's `management-mobile`) over the SAME
+`ligretto-api` and the SAME platform auth. No new backend — this unit is purely the mobile client. Built
+after the 003/004 API exists; feature parity with the web app for the core loop.
+
+- **S-006-1 — Mobile scaffold + auth + shell.** Expo/React Native app; sign in via the platform's mobile
+  PKCE flow (react-auth); secure token storage + refresh; protected navigation; EN/NL i18n; themed
+  (branding-aware, like `management-mobile`). *AC:* sign in on a device/emulator lands authenticated;
+  `GET /api/v1/me` works from the app; language switch works.
+- **S-006-2 — Rules + games (mobile).** Rules screen; create/host a game (name, target), add players
+  (2–10, accounts or guests), my-games list. *AC:* a game created on mobile is the same record the web
+  app sees.
+- **S-006-3 — Scoreboard + round entry (mobile).** Touch-optimised round entry (counts w/ auto-compute or
+  net) + live scoreboard + game-end prompt + finish. *AC:* score a full game on a phone; totals match the
+  server; finishing freezes it.
+- **S-006-4 — History + stats (mobile).** History list + game detail (round grid) + player stats. *AC:*
+  browse past games + open detail on mobile.
+
+> Cross-cutting: the mobile app reuses the web app's API contract verbatim; any API added for the web is
+> immediately available to mobile. The scoring engine + isolation live server-side, so both clients stay
+> thin.

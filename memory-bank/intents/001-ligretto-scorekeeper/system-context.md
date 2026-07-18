@@ -15,16 +15,21 @@ flowchart TB
 
   subgraph app[Ligretto Scorekeeper — THIS project]
     FE[ligretto-web<br/>React + Vite + MUI + react-login]
+    MO[ligretto-mobile<br/>React Native + Expo + react-auth]
     BE[ligretto-api<br/>FastAPI + SQLAlchemy]
     DB[(ligretto DB<br/>SQLite dev / MySQL prod)]
   end
 
-  U -->|1. sign in| FE
-  FE -->|2. PKCE redirect| LW
+  U -->|sign in| FE
+  U -->|sign in| MO
+  FE -->|PKCE| LW
+  MO -->|PKCE mobile| LA
   LW --> LA
-  LA -->|3. JWT access token| FE
-  FE -->|4. Bearer JWT on every call| BE
-  BE -->|5. validate JWT locally vs cached JWKS| LA
+  LA -->|JWT access token| FE
+  LA -->|JWT access token| MO
+  FE -->|Bearer JWT on every call| BE
+  MO -->|Bearer JWT on every call| BE
+  BE -->|validate JWT locally vs cached JWKS| LA
   BE --> DB
 ```
 

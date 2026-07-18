@@ -11,4 +11,8 @@
 - **2026-07-18T17:41:43Z** — Auto-continued: generated `system-context.md`, `units.md` (5 units, 17
   stories), `story-index.md`, and 6 bolt stubs (`memory-bank/bolts/001..006`). Story detail lives in
   `units.md` (with per-story acceptance criteria); individual story files can be materialised at
-  construction. Awaiting **Checkpoint 3** (artifacts review) + GitHub repo creation.
+  construction.
+- **2026-07-18T17:41:43Z** — **Checkpoint 3**: user chose a **public** GitHub repo `ligretto` and added a
+  requirement — a **mobile version in addition to the website**. Plan extended: new **Unit 006 mobile-app**
+  (React Native + Expo over the same ligretto-api) + bolts **007–009**. Now **6 units / 21 stories /
+  9 bolts**. requirements/system-context/units/story-index/project updated. Inception COMPLETE.
