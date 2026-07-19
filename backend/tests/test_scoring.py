@@ -59,6 +59,14 @@ def test_game_over_points():
     )
 
 
+def test_game_over_endless_never_ends():
+    # Endless games never auto-end regardless of rounds played or scores reached.
+    assert not scoring.is_game_over("endless", 0, completed_rounds=0, player_totals={})
+    assert not scoring.is_game_over(
+        "endless", 0, completed_rounds=99, player_totals={1: 10_000, 2: 5}
+    )
+
+
 def test_game_over_unknown_type():
     with pytest.raises(ValueError):
         scoring.is_game_over("bogus", 1, completed_rounds=1, player_totals={})

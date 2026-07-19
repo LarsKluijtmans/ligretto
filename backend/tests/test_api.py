@@ -276,6 +276,44 @@ def test_create_game_ok_and_listed(app_client, create_game_payload):
     assert lst.json()[0]["player_count"] == 3
 
 
+def test_endless_game_is_the_default_and_never_reports_game_over(app_client):
+    # No target_type sent → defaults to endless; any target_value is normalised away to 0.
+    r = app_client.post(
+        "/api/v1/games",
+        json={
+            "name": "Endless night",
+            "target_value": 999,  # ignored for endless
+            "players": [{"kind": "guest", "display_name": "P1"}, {"kind": "guest", "display_name": "P2"}],
+        },
+    )
+    assert r.status_code == 201
+    game = r.json()
+    assert game["target_type"] == "endless"
+    assert game["target_value"] == 0
+    assert game["game_over"] is False
+
+    # Score a big round — still not "over"; only a manual finish ends an endless game.
+    p1, p2 = game["players"][0]["id"], game["players"][1]["id"]
+    detail = app_client.post(
+        f"/api/v1/games/{game['id']}/rounds",
+        json={"scores": [{"game_player_id": p1, "net": 5000}, {"game_player_id": p2, "net": 3}]},
+    ).json()
+    assert detail["game_over"] is False
+
+    finished = app_client.post(f"/api/v1/games/{game['id']}/finish")
+    assert finished.status_code == 200
+    assert finished.json()["status"] == "completed"
+
+
+def test_rounds_and_points_still_require_a_positive_target(app_client):
+    for bad in ({"target_type": "rounds", "target_value": 0}, {"target_type": "points", "target_value": 0}):
+        r = app_client.post(
+            "/api/v1/games",
+            json={**bad, "players": [{"kind": "guest", "display_name": "P1"}]},
+        )
+        assert r.status_code == 422
+
+
 def test_enter_round_recomputes_totals(app_client, create_game_payload):
     game = app_client.post("/api/v1/games", json=create_game_payload(players=2)).json()
     p1, p2 = game["players"][0]["id"], game["players"][1]["id"]

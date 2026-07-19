@@ -59,9 +59,12 @@ def is_game_over(
 ) -> bool:
     """Has the game reached its end condition?
 
+    - 'endless': never — the host keeps playing and finishes manually.
     - 'rounds': over when the number of completed rounds >= target_value.
     - 'points': over when any player's total >= target_value.
     """
+    if target_type == "endless":
+        return False
     if target_type == "rounds":
         return completed_rounds >= target_value
     if target_type == "points":

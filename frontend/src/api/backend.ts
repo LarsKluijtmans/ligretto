@@ -7,7 +7,7 @@ import { env } from "../env";
 // ---------------------------------------------------------------------------------------------
 // Shared enums / literals (match the SQLAlchemy models in the contract)
 // ---------------------------------------------------------------------------------------------
-export type TargetType = "rounds" | "points";
+export type TargetType = "endless" | "rounds" | "points";
 export type GameStatus = "active" | "completed" | "abandoned";
 export type PlayerKind = "account" | "guest";
 
@@ -286,6 +286,7 @@ export function targetReached(game: {
   players: GamePlayerView[];
   rounds: RoundView[];
 }): boolean {
+  if (game.target_type === "endless") return false; // no target — the host finishes manually
   if (game.target_type === "rounds") return game.rounds.length >= game.target_value;
   return game.players.some((p) => p.total >= game.target_value);
 }

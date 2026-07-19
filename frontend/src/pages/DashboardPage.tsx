@@ -71,9 +71,11 @@ export function DashboardPage() {
 function GameRow({ game, onOpen }: { game: GameListItem; onOpen: () => void }) {
   const { t } = useTranslation("app");
   const targetLabel =
-    game.target_type === "rounds"
-      ? t("dashboard.target_rounds", { n: game.target_value })
-      : t("dashboard.target_points", { n: game.target_value });
+    game.target_type === "endless"
+      ? t("dashboard.target_endless")
+      : game.target_type === "rounds"
+        ? t("dashboard.target_rounds", { n: game.target_value })
+        : t("dashboard.target_points", { n: game.target_value });
 
   return (
     <Card>

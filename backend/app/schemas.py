@@ -122,7 +122,7 @@ class ProfileUpdateIn(BaseModel):
 
 # --- Games -----------------------------------------------------------------------
 
-TargetType = Literal["rounds", "points"]
+TargetType = Literal["endless", "rounds", "points"]
 PlayerKind = Literal["account", "guest"]
 
 
@@ -133,9 +133,19 @@ class NewPlayerIn(BaseModel):
 
 class CreateGameIn(BaseModel):
     name: str | None = Field(default=None, max_length=255)
-    target_type: TargetType
-    target_value: int = Field(gt=0)
+    # Default is 'endless': keep playing until the host finishes manually (no target). target_value is
+    # ignored for endless games and required (> 0) for rounds/points.
+    target_type: TargetType = "endless"
+    target_value: int = Field(default=0, ge=0)
     players: list[NewPlayerIn]
+
+    @model_validator(mode="after")
+    def _check_target(self) -> "CreateGameIn":
+        if self.target_type == "endless":
+            self.target_value = 0
+        elif self.target_value <= 0:
+            raise ValueError("target_value must be > 0 for 'rounds' and 'points' games")
+        return self
 
 
 class GameSummary(BaseModel):

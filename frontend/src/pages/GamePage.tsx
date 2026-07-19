@@ -226,9 +226,11 @@ function GameBody({
       : undefined;
 
   const targetLabel =
-    game.target_type === "rounds"
-      ? t("dashboard.target_rounds", { n: game.target_value })
-      : t("dashboard.target_points", { n: game.target_value });
+    game.target_type === "endless"
+      ? t("dashboard.target_endless")
+      : game.target_type === "rounds"
+        ? t("dashboard.target_rounds", { n: game.target_value })
+        : t("dashboard.target_points", { n: game.target_value });
 
   const editingRound = editing !== null ? game.rounds.find((r) => r.number === editing) : undefined;
 

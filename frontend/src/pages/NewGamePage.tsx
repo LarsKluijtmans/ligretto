@@ -32,7 +32,7 @@ export function NewGamePage() {
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
-  const [targetType, setTargetType] = useState<TargetType>("rounds");
+  const [targetType, setTargetType] = useState<TargetType>("endless");
   const [targetValue, setTargetValue] = useState(5);
   const [players, setPlayers] = useState<NewPlayerInput[]>([]);
   const [guestName, setGuestName] = useState("");
@@ -135,24 +135,31 @@ export function NewGamePage() {
                 fullWidth
                 size="small"
               >
+                <ToggleButton value="endless">{t("newGame.targetEndless")}</ToggleButton>
                 <ToggleButton value="rounds">{t("newGame.targetRounds")}</ToggleButton>
                 <ToggleButton value="points">{t("newGame.targetPoints")}</ToggleButton>
               </ToggleButtonGroup>
-              <TextField
-                type="number"
-                sx={{ mt: 1.5 }}
-                label={
-                  targetType === "rounds"
-                    ? t("newGame.targetValueRounds")
-                    : t("newGame.targetValuePoints")
-                }
-                value={targetValue}
-                onChange={(e) =>
-                  setTargetValue(Math.max(1, Math.round(Number(e.target.value) || 0)))
-                }
-                slotProps={{ htmlInput: { min: 1 } }}
-                fullWidth
-              />
+              {targetType === "endless" ? (
+                <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
+                  {t("newGame.targetEndlessHint")}
+                </Typography>
+              ) : (
+                <TextField
+                  type="number"
+                  sx={{ mt: 1.5 }}
+                  label={
+                    targetType === "rounds"
+                      ? t("newGame.targetValueRounds")
+                      : t("newGame.targetValuePoints")
+                  }
+                  value={targetValue}
+                  onChange={(e) =>
+                    setTargetValue(Math.max(1, Math.round(Number(e.target.value) || 0)))
+                  }
+                  slotProps={{ htmlInput: { min: 1 } }}
+                  fullWidth
+                />
+              )}
             </Box>
           </Stack>
         </CardContent>
