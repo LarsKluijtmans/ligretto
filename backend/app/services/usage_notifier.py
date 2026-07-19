@@ -25,9 +25,18 @@ def record_usage(
     subject: str | None = None,
     project_id: str | None = None,
     quantity: int = 1,
+    reference_1: str | None = None,
+    reference_2: str | None = None,
+    reference_3: str | None = None,
     metadata: dict[str, Any] | None = None,
 ) -> bool:
-    """Record one feature-usage event. Returns True if accepted, False on any failure."""
+    """Record one feature-usage event. Returns True if accepted, False on any failure.
+
+    ``reference_1/2/3`` are the customer-defined GROUPING keys the platform's usage reads (and billing)
+    aggregate + filter by — stable, low-cardinality segments (Ligretto uses ``reference_1`` = game mode).
+    Per-event ATTRIBUTES you only want to read back verbatim (players, target) belong in ``metadata``;
+    a metered VOLUME (rounds played) belongs in ``quantity`` (units, default 1), not a reference.
+    """
     if not settings.enable_usage_events:
         return False
     event: dict[str, Any] = {"feature": feature, "quantity": quantity, "metadata": metadata or {}}
@@ -35,6 +44,11 @@ def record_usage(
         event["subject"] = subject
     if project_id:
         event["project_id"] = project_id
+    for key, value in (
+        ("reference_1", reference_1), ("reference_2", reference_2), ("reference_3", reference_3),
+    ):
+        if value is not None:
+            event[key] = value
     try:
         # The admin client already holds the M2M token and the logs-api base URL; `service="logs"`
         # routes there and refreshes the token on a 401.
