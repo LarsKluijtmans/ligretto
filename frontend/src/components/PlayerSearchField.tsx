@@ -1,7 +1,6 @@
 import { useAuth } from "@lars-kluijtmans/react-auth";
 import { Box, CircularProgress, Stack, TextField, Typography } from "@mui/material";
-import { Search } from "lucide-react";
-import type { ReactNode } from "react";
+import { Check, Search, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { api } from "../api/backend";
@@ -11,12 +10,15 @@ import { PlayerCard } from "./PlayerCard";
 const MIN_QUERY = 2;
 const DEBOUNCE_MS = 300;
 
-// Debounced search over existing Ligretto players → a list of PlayerCards. `renderAction` lets a
-// caller attach a per-card action (e.g. an Invite button in bolt 012); omit it for discovery-only.
+// Debounced search over existing Ligretto players → a list of PlayerCards. When `onPick` is given each
+// result card IS the button (tap anywhere → onPick), and `isPicked` dims + check-marks the ones already
+// chosen. Omit both for discovery-only.
 export function PlayerSearchField({
-  renderAction,
+  onPick,
+  isPicked,
 }: {
-  renderAction?: (player: PlayerCardData) => ReactNode;
+  onPick?: (player: PlayerCardData) => void;
+  isPicked?: (player: PlayerCardData) => boolean;
 }) {
   const { t } = useTranslation("app");
   const { getAccessToken } = useAuth();
@@ -79,9 +81,22 @@ export function PlayerSearchField({
         </Typography>
       )}
       <Stack spacing={1}>
-        {results.map((p) => (
-          <PlayerCard key={p.id} player={p} action={renderAction?.(p)} />
-        ))}
+        {results.map((p) => {
+          const picked = isPicked?.(p) ?? false;
+          return (
+            <PlayerCard
+              key={p.id}
+              player={p}
+              onClick={onPick && !picked ? () => onPick(p) : undefined}
+              disabled={picked}
+              trailing={
+                onPick ? (
+                  picked ? <Check size={18} /> : <UserPlus size={18} />
+                ) : undefined
+              }
+            />
+          );
+        })}
       </Stack>
     </Stack>
   );

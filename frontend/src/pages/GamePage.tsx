@@ -21,7 +21,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { ArrowLeft, Ban, Crown, Flag, Pencil, Plus, UserPlus, X } from "lucide-react";
+import { ArrowLeft, Ban, Crown, Flag, Pencil, Plus, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
@@ -480,17 +480,8 @@ function InvitePlayersSection({ gameId }: { gameId: string }) {
           {t("invites.invitePlayersHint")}
         </Typography>
         <PlayerSearchField
-          renderAction={(p) => (
-            <Button
-              size="small"
-              variant="outlined"
-              startIcon={<UserPlus size={16} />}
-              disabled={busy === p.id || active.has(p.id)}
-              onClick={() => void invite(p)}
-            >
-              {active.has(p.id) ? t("invites.invited") : t("invites.invite")}
-            </Button>
-          )}
+          onPick={(p) => void invite(p)}
+          isPicked={(p) => active.has(p.id) || busy === p.id}
         />
         {feedback && (
           <Alert severity={feedback.severity} sx={{ mt: 1.5 }} onClose={() => setFeedback(null)}>

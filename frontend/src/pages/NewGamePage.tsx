@@ -250,20 +250,8 @@ export function NewGamePage() {
             {t("invites.invitePlayersHint")}
           </Typography>
           <PlayerSearchField
-            renderAction={(p) => {
-              const staged = invitees.some((x) => x.id === p.id);
-              return (
-                <Button
-                  size="small"
-                  variant="outlined"
-                  startIcon={<UserPlus size={16} />}
-                  disabled={staged}
-                  onClick={() => stageInvite(p)}
-                >
-                  {staged ? t("invites.invited") : t("invites.invite")}
-                </Button>
-              );
-            }}
+            onPick={stageInvite}
+            isPicked={(p) => invitees.some((x) => x.id === p.id)}
           />
           {invitees.length > 0 && (
             <Box sx={{ mt: 2 }}>
