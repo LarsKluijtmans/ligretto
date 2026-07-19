@@ -79,8 +79,8 @@ export function NewGamePage() {
 
   const submit = async () => {
     setError(null);
-    if (players.length < MIN_PLAYERS) {
-      setError(t("newGame.needTwo"));
+    if (players.length < 1) {
+      setError(t("newGame.needOne"));
       return;
     }
     if (players.length > MAX_PLAYERS) {
@@ -305,7 +305,7 @@ export function NewGamePage() {
         </Button>
         <Button
           sx={{ flexGrow: 1 }}
-          disabled={submitting || players.length < MIN_PLAYERS}
+          disabled={submitting || players.length < 1}
           onClick={() => void submit()}
         >
           {t("newGame.create")}

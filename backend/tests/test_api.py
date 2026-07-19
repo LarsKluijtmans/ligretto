@@ -242,9 +242,19 @@ def test_update_profile_rejects_bad_icon(app_client):
     )
 
 
-def test_create_game_enforces_min_players(app_client, create_game_payload):
+def test_create_game_allows_one_seated_but_scoring_needs_two(app_client, create_game_payload):
+    # 0 players is still invalid
+    assert app_client.post("/api/v1/games", json=create_game_payload(players=0)).status_code == 400
+    # 1 seated player is now allowed — create solo, then invite the rest (accept-required)
     r = app_client.post("/api/v1/games", json=create_game_payload(players=1))
-    assert r.status_code == 400
+    assert r.status_code == 201
+    gid = r.json()["id"]
+    seat_id = r.json()["players"][0]["id"]
+    # ...but you cannot SCORE until there are at least 2 players
+    scored = app_client.post(
+        f"/api/v1/games/{gid}/rounds", json={"scores": [{"game_player_id": seat_id, "net": 5}]}
+    )
+    assert scored.status_code == 400
 
 
 def test_create_game_enforces_max_players(app_client, create_game_payload):

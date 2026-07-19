@@ -57,10 +57,10 @@ class GameService:
 
     def create_game(self, host_player_id: int, data: CreateGameIn) -> Game:
         n = len(data.players)
-        if n < MIN_PLAYERS or n > MAX_PLAYERS:
-            raise BadRequest(
-                f"a game needs {MIN_PLAYERS}..{MAX_PLAYERS} players (got {n})"
-            )
+        # At least 1 seated player (the host) — you can create a game with just yourself and INVITE the
+        # rest (accept-required, so they seat themselves on accept). Scoring still needs 2 (see add_round).
+        if n < 1 or n > MAX_PLAYERS:
+            raise BadRequest(f"a game needs 1..{MAX_PLAYERS} players (got {n})")
         game = Game(
             host_player_id=host_player_id,
             name=data.name,
@@ -183,6 +183,10 @@ class GameService:
         game = self._require_game(game_id, host_player_id)
         if game.status != "active":
             raise Conflict("cannot score a finished game")
+        if len(game.players) < MIN_PLAYERS:
+            raise BadRequest(
+                f"add at least {MIN_PLAYERS} players (invite someone or add a guest) before scoring"
+            )
         if not entries:
             raise BadRequest("a round needs at least one score")
         next_number = max((r.number for r in game.rounds), default=0) + 1
