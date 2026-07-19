@@ -62,12 +62,8 @@ export function AppShell() {
             sx={{ flexGrow: 1, alignItems: "center", cursor: "pointer" }}
             onClick={() => navigate("/")}
           >
-            {branding.logoUrl ? (
+            {branding.logoUrl && (
               <Box component="img" src={branding.logoUrl} alt="" sx={{ height: 32 }} />
-            ) : (
-              <Avatar sx={{ width: 34, height: 34, bgcolor: "secondary.main", fontWeight: 800 }}>
-                L
-              </Avatar>
             )}
             <Box sx={{ lineHeight: 1 }}>
               <Typography variant="h6" noWrap sx={{ fontWeight: 800, lineHeight: 1.1 }}>
