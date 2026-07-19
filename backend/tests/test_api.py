@@ -88,6 +88,76 @@ def test_display_name_falls_back_to_email_prefix():
     assert display_name_for(Player(sub="s", display_name="", email=None)) == "Player"
 
 
+# --- Bolt 011: game invitations (accept-required) ----------------------------------------------
+
+def _provision(app_client, sub):
+    app_client._set_user(sub)
+    app_client.get("/api/v1/me")
+
+
+def test_invite_accept_seats_grants_read_and_history(app_client, create_game_payload):
+    app_client.get("/api/v1/me")  # alice hosts
+    gid = app_client.post("/api/v1/games", json=create_game_payload()).json()["id"]
+    _provision(app_client, "user-bob")  # bob exists as a player
+    app_client._set_user("user-alice")
+
+    r = app_client.post(f"/api/v1/games/{gid}/invitations", json={"invitee_id": "user-bob"})
+    assert r.status_code == 201
+    inv = r.json()
+    assert inv["status"] == "pending"
+    assert inv["invitee"]["id"] == "user-bob"
+    assert "email" not in inv["invitee"]  # card never leaks email
+    iid = inv["id"]
+    assert any(i["id"] == iid for i in app_client.get(f"/api/v1/games/{gid}/invitations").json())
+
+    # bob: sees the pending invite, but CANNOT read the game until he accepts
+    app_client._set_user("user-bob")
+    pend = app_client.get("/api/v1/invitations").json()
+    assert len(pend) == 1 and pend[0]["game_id"] == gid and pend[0]["inviter"]["id"] == "user-alice"
+    assert app_client.get(f"/api/v1/games/{gid}").status_code == 404
+
+    # accept → seated as an account player, game readable, appears in bob's history
+    assert app_client.post(f"/api/v1/invitations/{iid}/accept").status_code == 200
+    detail = app_client.get(f"/api/v1/games/{gid}")
+    assert detail.status_code == 200
+    assert len(detail.json()["players"]) == 3  # 2 guests + bob
+    assert any(g["id"] == gid for g in app_client.get("/api/v1/history").json())
+    assert app_client.get("/api/v1/invitations").json() == []  # no longer pending
+
+
+def test_invite_only_by_host(app_client, create_game_payload):
+    app_client.get("/api/v1/me")
+    gid = app_client.post("/api/v1/games", json=create_game_payload()).json()["id"]
+    _provision(app_client, "user-bob")  # bob is now the caller (not the host)
+    assert (
+        app_client.post(f"/api/v1/games/{gid}/invitations", json={"invitee_id": "user-bob"}).status_code
+        == 404
+    )
+
+
+def test_cannot_invite_the_same_player_twice(app_client, create_game_payload):
+    app_client.get("/api/v1/me")
+    gid = app_client.post("/api/v1/games", json=create_game_payload()).json()["id"]
+    _provision(app_client, "user-bob")
+    app_client._set_user("user-alice")
+    assert app_client.post(f"/api/v1/games/{gid}/invitations", json={"invitee_id": "user-bob"}).status_code == 201
+    assert app_client.post(f"/api/v1/games/{gid}/invitations", json={"invitee_id": "user-bob"}).status_code == 409
+
+
+def test_decline_does_not_seat_or_grant_read(app_client, create_game_payload):
+    app_client.get("/api/v1/me")
+    gid = app_client.post("/api/v1/games", json=create_game_payload()).json()["id"]
+    _provision(app_client, "user-carol")
+    app_client._set_user("user-alice")
+    iid = app_client.post(f"/api/v1/games/{gid}/invitations", json={"invitee_id": "user-carol"}).json()["id"]
+
+    app_client._set_user("user-carol")
+    assert app_client.post(f"/api/v1/invitations/{iid}/decline").status_code == 200
+    assert app_client.get(f"/api/v1/games/{gid}").status_code == 404  # never seated
+    app_client._set_user("user-alice")
+    assert len(app_client.get(f"/api/v1/games/{gid}").json()["players"]) == 2  # unchanged
+
+
 def test_win_rate_counts_a_tied_top_score_as_a_win():
     from app.models import Game, GamePlayer, RoundScore
     from app.services.stats_service import StatsService

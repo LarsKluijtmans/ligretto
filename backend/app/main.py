@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .database import init_db
-from .routers import games, history, logs, me, players
+from .routers import games, history, invitations, logs, me, players
 
 
 @asynccontextmanager
@@ -37,6 +37,7 @@ app.include_router(games.router)
 app.include_router(history.router)
 app.include_router(logs.router)
 app.include_router(players.router)
+app.include_router(invitations.router)
 
 
 @app.get("/health")

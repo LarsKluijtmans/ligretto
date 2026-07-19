@@ -37,9 +37,9 @@ Intent **002-player-invites-and-stats**. Status legend: ⬜ planned · ✅ done.
 | S-007-1 | 007 player-directory-and-stats | 010 | Player search API (name/email; no email returned) | ✅ |
 | S-007-2 | 007 player-directory-and-stats | 010 | Win-rate + public player stats | ✅ |
 | S-007-3 | 007 player-directory-and-stats | 010 | Player card + search UI (web) | ✅ |
-| S-008-1 | 008 game-invitations | 011 | Invitation domain + host actions | ⬜ |
-| S-008-2 | 008 game-invitations | 011 | Invitee accept / decline | ⬜ |
-| S-008-3 | 008 game-invitations | 011 | Consent-safe stats + history wiring | ⬜ |
+| S-008-1 | 008 game-invitations | 011 | Invitation domain + host actions | ✅ |
+| S-008-2 | 008 game-invitations | 011 | Invitee accept / decline | ✅ |
+| S-008-3 | 008 game-invitations | 011 | Consent-safe stats + history wiring | ✅ |
 | S-008-4 | 008 game-invitations | 012 | Invite + pending-invites UI (web) | ⬜ |
 | S-010-1 | 010 realtime-invite-notifications | 014 | Backend SSE event stream + publish on invite | ⬜ |
 | S-010-3 | 010 realtime-invite-notifications | 014 | Away push + email on invite (notification-api) | ⬜ |

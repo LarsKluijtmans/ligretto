@@ -9,10 +9,12 @@ from sqlalchemy.orm import Session
 from .database import get_db
 from .models import Player
 from .repositories.game import GameRepository
+from .repositories.invitation import InvitationRepository
 from .repositories.player import PlayerRepository
 from .repositories.round import RoundRepository
 from .security import Principal, verify_token
 from .services.game_service import GameService
+from .services.invitation_service import InvitationService
 from .services.player_directory_service import PlayerDirectoryService
 from .services.player_service import PlayerService
 from .services.stats_service import StatsService
@@ -24,6 +26,15 @@ def player_service(db: Session = Depends(get_db)) -> PlayerService:
 
 def player_directory_service(db: Session = Depends(get_db)) -> PlayerDirectoryService:
     return PlayerDirectoryService(PlayerRepository(db), StatsService(GameRepository(db)))
+
+
+def invitation_service(db: Session = Depends(get_db)) -> InvitationService:
+    return InvitationService(
+        InvitationRepository(db),
+        GameRepository(db),
+        PlayerRepository(db),
+        StatsService(GameRepository(db)),
+    )
 
 
 def game_service(db: Session = Depends(get_db)) -> GameService:

@@ -130,6 +130,27 @@ class Round(Base):
     )
 
 
+class GameInvitation(Base):
+    """An invitation for an existing Ligretto player to join a game. Accept-required (intent 002):
+    the invitee is not seated until they accept — only then are their scores/stats tracked. A player
+    can hold at most one non-terminal (pending/accepted) invite per game (enforced in the service)."""
+
+    __tablename__ = "game_invitation"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    game_id: Mapped[int] = mapped_column(ForeignKey("game.id"), index=True, nullable=False)
+    inviter_player_id: Mapped[int] = mapped_column(ForeignKey("player.id"), nullable=False)
+    invitee_player_id: Mapped[int] = mapped_column(
+        ForeignKey("player.id"), index=True, nullable=False
+    )
+    # 'pending' | 'accepted' | 'declined' | 'cancelled'
+    status: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="pending", server_default="pending"
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, nullable=False)
+    responded_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
 class RoundScore(Base):
     __tablename__ = "round_score"
 

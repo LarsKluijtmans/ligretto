@@ -1,8 +1,16 @@
 # Bolt 011 — game-invitations-api
 
-- **Intent:** 002-player-invites-and-stats · **Unit:** 008 game-invitations · **Status:** planned
-- **Created:** 2026-07-18T23:18:46Z
+- **Intent:** 002-player-invites-and-stats · **Unit:** 008 game-invitations · **Status:** done
+- **Created:** 2026-07-18T23:18:46Z · **Completed:** 2026-07-19T07:22:40Z
 - **Depends on:** 010 player-directory, 001 unit 003 (games)
+
+> **Done (2026-07-19):** `game_invitation` model (created by create_all — no reconcile) + repo; host
+> `POST/GET/DELETE /games/:id/invitations`; invitee `GET /invitations`, `POST /invitations/:id/accept`
+> (seats a `kind='account'` player with player_id set) `/decline`. Consent-safe reads: game reads +
+> `/history` + `/stats/me` now span games the caller HOSTED **or ACCEPTED** (GameRepository.list_for_player
+> / get_readable); a PENDING invitee cannot read the game until they accept; mutations stay host-only.
+> 41 backend tests (accept seats+grants-read+history, host-only, no-double-invite, decline-no-seat).
+> Deployed; table + endpoints verified. Web UI (invite dialog + pending-invites) is bolt 012.
 
 ## Goal
 The accept-required invitation domain + consent-safe cross-user stats/history (server side).

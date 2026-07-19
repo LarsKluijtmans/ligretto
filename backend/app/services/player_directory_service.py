@@ -25,6 +25,21 @@ def display_name_for(player: Player) -> str:
     return name or "Player"
 
 
+def to_player_card(player: Player, stats: StatsService) -> PlayerCard:
+    """Build a player's PUBLIC card (name + icon + win rate; never email). Shared by search and the
+    invitation views so every surface shows the same thing."""
+    played, _wins, win_rate = stats.win_rate_for(player.id)
+    return PlayerCard(
+        id=player.sub,
+        display_name=display_name_for(player),
+        icon_type=player.icon_type,
+        icon_value=player.icon_value,
+        avatar_data_url=player.avatar_data_url,
+        win_rate=win_rate,
+        games_played=played,
+    )
+
+
 class PlayerDirectoryService:
     def __init__(self, players: PlayerRepository, stats: StatsService) -> None:
         self.players = players
@@ -34,18 +49,4 @@ class PlayerDirectoryService:
         q = (query or "").strip()
         if len(q) < MIN_QUERY_LEN:
             return []
-        cards: list[PlayerCard] = []
-        for p in self.players.search(q, MAX_RESULTS):
-            played, _wins, win_rate = self.stats.win_rate_for(p.id)
-            cards.append(
-                PlayerCard(
-                    id=p.sub,
-                    display_name=display_name_for(p),
-                    icon_type=p.icon_type,
-                    icon_value=p.icon_value,
-                    avatar_data_url=p.avatar_data_url,
-                    win_rate=win_rate,
-                    games_played=played,
-                )
-            )
-        return cards
+        return [to_player_card(p, self.stats) for p in self.players.search(q, MAX_RESULTS)]

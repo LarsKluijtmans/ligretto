@@ -15,9 +15,11 @@ class StatsService:
     def __init__(self, games: GameRepository) -> None:
         self.games = games
 
-    def me(self, host_player_id: int, player_id: int) -> StatsOut:
-        games: list[Game] = self.games.list_for_host(
-            host_player_id, statuses=["completed"]
+    def me(self, player_id: int) -> StatsOut:
+        # Games the caller HOSTED or ACCEPTED (intent 002) — so an invited player's stats span every
+        # game they joined, not only games they hosted.
+        games: list[Game] = self.games.list_for_player(
+            player_id, statuses=["completed"]
         )
         games_played = len(games)
         wins = 0

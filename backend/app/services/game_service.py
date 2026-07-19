@@ -82,17 +82,22 @@ class GameService:
         self.games.commit()
         return self._require_game(game.id, host_player_id)
 
-    def get_game(self, game_id: int, host_player_id: int) -> Game:
-        return self._require_game(game_id, host_player_id)
+    def get_game(self, game_id: int, player_id: int) -> Game:
+        # Readable by the host OR an accepted account player (intent 002). Mutations stay host-only
+        # (they still go through _require_game).
+        game = self.games.get_readable(game_id, player_id)
+        if game is None:
+            raise NotFound("game not found")
+        return game
 
-    def list_games(self, host_player_id: int) -> list[Game]:
-        return self.games.list_for_host(host_player_id)
+    def list_games(self, player_id: int) -> list[Game]:
+        return self.games.list_for_player(player_id)
 
     def history(
-        self, host_player_id: int, *, limit: int = 50, offset: int = 0
+        self, player_id: int, *, limit: int = 50, offset: int = 0
     ) -> list[Game]:
-        return self.games.list_for_host(
-            host_player_id,
+        return self.games.list_for_player(
+            player_id,
             statuses=["active", "completed"],
             limit=limit,
             offset=offset,

@@ -71,6 +71,34 @@ class PlayerCard(BaseModel):
     games_played: int = 0
 
 
+# --- Invitations (intent 002) ----------------------------------------------------
+
+InvitationStatus = Literal["pending", "accepted", "declined", "cancelled"]
+
+
+class InviteCreateIn(BaseModel):
+    invitee_id: str = Field(min_length=1)  # the searched player's public id (sub)
+
+
+class InvitationOut(BaseModel):
+    """Host's view of an invitation for their game — who was invited + the status."""
+
+    id: int
+    status: InvitationStatus
+    created_at: datetime
+    invitee: PlayerCard
+
+
+class PendingInviteOut(BaseModel):
+    """Invitee's view of a pending invitation — the game + who invited them. No scores."""
+
+    id: int
+    game_id: int
+    game_name: str | None = None
+    inviter: PlayerCard
+    created_at: datetime
+
+
 class ProfileUpdateIn(BaseModel):
     display_name: str = Field(min_length=1, max_length=255)
     icon_type: IconType = "none"

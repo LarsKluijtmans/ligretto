@@ -32,4 +32,4 @@ def stats_me(
     me: Player = Depends(current_player),
     stats: StatsService = Depends(stats_service),
 ) -> StatsOut:
-    return stats.me(me.id, me.id)
+    return stats.me(me.id)
