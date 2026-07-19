@@ -58,6 +58,19 @@ class MeOut(BaseModel):
     language: str | None = None
 
 
+class PlayerCard(BaseModel):
+    """A searchable player's PUBLIC card — display name + icon + win rate. Email is a search key
+    only and is intentionally absent here (never returned to other users)."""
+
+    id: str  # the player's stable public id (platform `sub`), used to invite them (bolt 011)
+    display_name: str  # with the email-local-part fallback applied when no display name is set
+    icon_type: IconType = "none"
+    icon_value: str | None = None
+    avatar_data_url: str | None = None
+    win_rate: float | None = None  # None when they have no scored completed games
+    games_played: int = 0
+
+
 class ProfileUpdateIn(BaseModel):
     display_name: str = Field(min_length=1, max_length=255)
     icon_type: IconType = "none"

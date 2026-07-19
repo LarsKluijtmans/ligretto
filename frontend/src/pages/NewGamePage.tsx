@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/backend";
 import type { NewPlayerInput, TargetType } from "../api/backend";
+import { PlayerSearchField } from "../components/PlayerSearchField";
 
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 10;
@@ -228,6 +229,15 @@ export function NewGamePage() {
               </Button>
             </Stack>
           </Stack>
+
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
+            {t("players.findTitle")}
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+            {t("players.findHint")}
+          </Typography>
+          <PlayerSearchField />
         </CardContent>
       </Card>
 

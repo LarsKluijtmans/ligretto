@@ -50,6 +50,22 @@ class GameRepository:
             stmt = stmt.limit(limit)
         return list(self.db.scalars(stmt))
 
+    def list_completed_seating(self, player_id: int) -> list[Game]:
+        """Completed games where `player_id` holds an account seat — used to compute that player's
+        OWN aggregate win rate (shown on their public card). NOT host-scoped: it returns aggregates,
+        never game detail exposed to other users. Loads seats + their scores so totals (and ties)
+        can be computed. Today a player is only seated in games they host; when invitations land
+        (bolt 011) accepted seats are included automatically."""
+        stmt = (
+            select(Game)
+            .join(GamePlayer, GamePlayer.game_id == Game.id)
+            .where(Game.status == "completed", GamePlayer.player_id == player_id)
+            .options(selectinload(Game.players).selectinload(GamePlayer.scores))
+            .order_by(Game.id.desc())
+            .distinct()
+        )
+        return list(self.db.scalars(stmt))
+
     # --- writes ------------------------------------------------------------------
 
     def add(self, game: Game) -> Game:

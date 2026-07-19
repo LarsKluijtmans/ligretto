@@ -21,6 +21,16 @@ export const en = {
       account: "Account",
     },
 
+    players: {
+      findTitle: "Find players",
+      findHint: "Search other Ligretto players by name or email.",
+      searchLabel: "Search players",
+      searchPlaceholder: "Name or email…",
+      noResults: "No players found.",
+      winRate: "{{pct}}% wins",
+      noGames: "No games yet",
+    },
+
     dashboard: {
       title: "My games",
       subtitle: "Games you host",

@@ -56,3 +56,23 @@ class StatsService:
             avg_score=round(avg_score, 2),
             best_round=best_round,
         )
+
+    def win_rate_for(self, player_id: int) -> tuple[int, int, float | None]:
+        """A player's public win rate: (games_played, wins, win_rate|None) over completed games
+        they were an account-seat in. A TIED top total counts as a win for each co-leader (per the
+        intent's win definition — the single `winner_game_player_id` is intentionally NOT used, since
+        it is null on ties). `win_rate` is None when they have no scored completed games."""
+        games = self.games.list_completed_seating(player_id)
+        played = 0
+        wins = 0
+        for game in games:
+            if not any(gp.scores for gp in game.players):
+                continue  # degenerate: completed but no rounds scored
+            totals = {gp.id: sum(sc.computed_score for sc in gp.scores) for gp in game.players}
+            played += 1
+            top = max(totals.values())
+            my_seat_ids = {gp.id for gp in game.players if gp.player_id == player_id}
+            if any(totals.get(sid) == top for sid in my_seat_ids):
+                wins += 1
+        win_rate = round(wins / played, 4) if played else None
+        return played, wins, win_rate

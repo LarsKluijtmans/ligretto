@@ -36,6 +36,18 @@ export type ProfileUpdate = {
   language?: string | null;
 };
 
+// A searchable player's PUBLIC card (from /players/search) — name + icon + win rate, never email.
+// `id` is the player's stable public id (used to invite them once invitations land, bolt 011/012).
+export type PlayerCardData = {
+  id: string;
+  display_name: string;
+  icon_type: IconType;
+  icon_value: string | null;
+  avatar_data_url: string | null;
+  win_rate: number | null; // null when they have no scored completed games
+  games_played: number;
+};
+
 export type GameListItem = {
   id: string;
   name: string | null;
@@ -155,6 +167,10 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify(update),
     }),
+
+  // Search existing Ligretto players by name or email (min 2 chars, capped). Never returns email.
+  searchPlayers: (getToken: TokenGetter, q: string) =>
+    request<PlayerCardData[]>(`/api/v1/players/search?q=${encodeURIComponent(q)}`, getToken),
 
   // Games
   listGames: (getToken: TokenGetter) => request<GameListItem[]>("/api/v1/games", getToken),

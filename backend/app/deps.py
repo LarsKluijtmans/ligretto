@@ -13,12 +13,17 @@ from .repositories.player import PlayerRepository
 from .repositories.round import RoundRepository
 from .security import Principal, verify_token
 from .services.game_service import GameService
+from .services.player_directory_service import PlayerDirectoryService
 from .services.player_service import PlayerService
 from .services.stats_service import StatsService
 
 
 def player_service(db: Session = Depends(get_db)) -> PlayerService:
     return PlayerService(PlayerRepository(db))
+
+
+def player_directory_service(db: Session = Depends(get_db)) -> PlayerDirectoryService:
+    return PlayerDirectoryService(PlayerRepository(db), StatsService(GameRepository(db)))
 
 
 def game_service(db: Session = Depends(get_db)) -> GameService:

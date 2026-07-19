@@ -47,6 +47,73 @@ def test_update_profile_saves_language(app_client):
     assert app_client.get("/api/v1/me").json()["language"] == "nl"
 
 
+# --- Bolt 010: player directory (search + win rate) ---------------------------------------------
+
+def test_player_search_finds_by_name_and_email_but_never_returns_email(app_client):
+    app_client.get("/api/v1/me")  # provision alice
+    app_client._set_user("user-bob")
+    app_client.get("/api/v1/me")  # provision bob (email user-bob@example.com)
+    app_client._set_user("user-alice")
+
+    by_name = app_client.get("/api/v1/players/search", params={"q": "bob"})
+    assert by_name.status_code == 200
+    cards = by_name.json()
+    bob = next((c for c in cards if c["id"] == "user-bob"), None)
+    assert bob is not None
+    assert "email" not in bob  # email is a search key, never returned
+    assert bob["win_rate"] is None and bob["games_played"] == 0  # no games yet
+
+    by_email = app_client.get("/api/v1/players/search", params={"q": "user-bob@example"})
+    ids = [c["id"] for c in by_email.json()]
+    assert "user-bob" in ids  # matched by email...
+    assert all("email" not in c for c in by_email.json())  # ...but email never appears
+
+
+def test_player_search_requires_min_query(app_client):
+    app_client.get("/api/v1/me")
+    assert app_client.get("/api/v1/players/search", params={"q": "a"}).json() == []
+    assert app_client.get("/api/v1/players/search", params={"q": ""}).json() == []
+
+
+def test_display_name_falls_back_to_email_prefix():
+    from app.models import Player
+    from app.services.player_directory_service import display_name_for
+
+    assert display_name_for(Player(sub="s", display_name="Alice", email="alice@x.com")) == "Alice"
+    # no display name -> local-part of the email
+    assert display_name_for(Player(sub="s", display_name="", email="sam@example.com")) == "sam"
+    # display name that is just the echoed email -> local-part
+    assert display_name_for(Player(sub="s", display_name="kim@a.io", email="kim@a.io")) == "kim"
+    # nothing usable -> generic label (never a raw email)
+    assert display_name_for(Player(sub="s", display_name="", email=None)) == "Player"
+
+
+def test_win_rate_counts_a_tied_top_score_as_a_win():
+    from app.models import Game, GamePlayer, RoundScore
+    from app.services.stats_service import StatsService
+
+    def seat(seat_id: int, pid: int, score: int) -> GamePlayer:
+        gp = GamePlayer(
+            id=seat_id, game_id=1, seat=seat_id, kind="account", player_id=pid, display_name="x"
+        )
+        gp.scores = [
+            RoundScore(round_id=1, game_player_id=seat_id, centre_cards=0, stack_left=0, computed_score=score)
+        ]
+        return gp
+
+    g_tie = Game(id=1, host_player_id=7, target_type="rounds", target_value=1, status="completed")
+    g_tie.players = [seat(1, 7, 20), seat(2, 8, 20)]   # 7 ties for the top -> counts as a win
+    g_loss = Game(id=2, host_player_id=7, target_type="rounds", target_value=1, status="completed")
+    g_loss.players = [seat(3, 7, 10), seat(4, 9, 25)]  # 7 loses
+
+    class FakeGames:
+        def list_completed_seating(self, player_id: int):
+            return [g for g in (g_tie, g_loss) if any(gp.player_id == player_id for gp in g.players)]
+
+    played, wins, rate = StatsService(FakeGames()).win_rate_for(7)
+    assert (played, wins, rate) == (2, 1, 0.5)
+
+
 def test_update_profile_with_emoji(app_client):
     app_client.get("/api/v1/me")
     r = app_client.patch(

@@ -23,6 +23,16 @@ export const nl: AppResources = {
       account: "Account",
     },
 
+    players: {
+      findTitle: "Spelers zoeken",
+      findHint: "Zoek andere Ligretto-spelers op naam of e-mail.",
+      searchLabel: "Spelers zoeken",
+      searchPlaceholder: "Naam of e-mail…",
+      noResults: "Geen spelers gevonden.",
+      winRate: "{{pct}}% gewonnen",
+      noGames: "Nog geen spellen",
+    },
+
     dashboard: {
       title: "Mijn spellen",
       subtitle: "Spellen die jij host",
