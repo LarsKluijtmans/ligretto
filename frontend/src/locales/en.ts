@@ -133,6 +133,8 @@ export const en = {
       winnerIs: "🏆 {{name}} wins!",
       seat: "Seat",
       player: "Player",
+      hostedBy: "Hosted by {{name}}",
+      hostedByYou: "You created this game",
     },
 
     history: {

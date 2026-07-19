@@ -135,6 +135,8 @@ export const nl: AppResources = {
       winnerIs: "🏆 {{name}} wint!",
       seat: "Plek",
       player: "Speler",
+      hostedBy: "Gehost door {{name}}",
+      hostedByYou: "Jij hebt dit spel aangemaakt",
     },
 
     history: {

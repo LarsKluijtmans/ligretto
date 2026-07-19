@@ -76,6 +76,7 @@ export type GameListItem = {
   player_count: number;
   current_round: number;
   leader_name?: string | null;
+  host_name?: string | null;
   created_at: string;
 };
 
@@ -110,6 +111,7 @@ export type GameDetail = {
   // highlighting so the board is robust regardless of the exact field shape.
   leader?: string | null;
   winner?: string | null;
+  host_name?: string | null; // who created / keeps score for this game
   created_at?: string;
   completed_at?: string | null;
   is_host: boolean; // only the host may score / finish / invite

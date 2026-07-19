@@ -80,6 +80,8 @@ class Game(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, nullable=False)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
+    # The creator/scorekeeper (shown on the game + in history). Distinct from the seated players.
+    host: Mapped["Player"] = relationship("Player", foreign_keys=[host_player_id])
     players: Mapped[list["GamePlayer"]] = relationship(
         "GamePlayer",
         back_populates="game",

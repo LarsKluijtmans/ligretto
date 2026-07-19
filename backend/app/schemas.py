@@ -147,6 +147,7 @@ class GameSummary(BaseModel):
     player_count: int
     current_round: int
     leader_name: str | None = None
+    host_name: str | None = None   # who created/keeps score for this game
     created_at: datetime
 
 
@@ -193,6 +194,7 @@ class GameDetail(BaseModel):
     rounds: list[RoundOut]
     leader: list[int] = []       # game_player_ids sharing the top total
     leader_name: str | None = None
+    host_name: str | None = None # who created/keeps score for this game
     winner: int | None = None    # game_player_id of the winner, when completed
     game_over: bool = False
     is_host: bool = False        # is the CALLER the host? (only the host may score/finish/invite)

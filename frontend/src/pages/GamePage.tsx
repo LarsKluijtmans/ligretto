@@ -243,6 +243,13 @@ function GameBody({
           <Typography variant="h4">
             {game.name || t("game.round", { n: game.rounds.length })}
           </Typography>
+          {(game.is_host || game.host_name) && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+              {game.is_host
+                ? t("game.hostedByYou")
+                : t("game.hostedBy", { name: game.host_name })}
+            </Typography>
+          )}
           <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: "wrap" }}>
             <StatusChip status={game.status} />
             <Chip size="small" variant="outlined" label={targetLabel} />

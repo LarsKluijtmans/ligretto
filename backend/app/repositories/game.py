@@ -33,6 +33,7 @@ class GameRepository:
             select(Game)
             .where(Game.id == game_id, Game.host_player_id == host_player_id)
             .options(
+                selectinload(Game.host),
                 selectinload(Game.players).selectinload(GamePlayer.scores),
                 selectinload(Game.rounds).selectinload(Round.scores),
             )
@@ -46,6 +47,7 @@ class GameRepository:
             select(Game)
             .where(Game.host_player_id == host_player_id)
             .options(
+                selectinload(Game.host),
                 selectinload(Game.players).selectinload(GamePlayer.scores),
                 selectinload(Game.rounds),
             )
@@ -66,6 +68,7 @@ class GameRepository:
             select(Game)
             .where(Game.id == game_id)
             .options(
+                selectinload(Game.host),
                 selectinload(Game.players).selectinload(GamePlayer.scores),
                 selectinload(Game.rounds).selectinload(Round.scores),
             )
@@ -77,6 +80,7 @@ class GameRepository:
             select(Game)
             .where(Game.id == game_id, _readable_by(player_id))
             .options(
+                selectinload(Game.host),
                 selectinload(Game.players).selectinload(GamePlayer.scores),
                 selectinload(Game.rounds).selectinload(Round.scores),
             )
@@ -91,6 +95,7 @@ class GameRepository:
             select(Game)
             .where(_readable_by(player_id))
             .options(
+                selectinload(Game.host),
                 selectinload(Game.players).selectinload(GamePlayer.scores),
                 selectinload(Game.rounds),
             )

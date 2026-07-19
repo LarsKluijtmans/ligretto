@@ -111,6 +111,11 @@ export function HistoryPage() {
                           {t("dashboard.players", { count: g.player_count })}
                           {g.leader_name ? ` · ${t("dashboard.leader", { name: g.leader_name })}` : ""}
                         </Typography>
+                        {g.host_name && (
+                          <Typography variant="caption" color="text.secondary" component="div">
+                            {t("game.hostedBy", { name: g.host_name })}
+                          </Typography>
+                        )}
                       </Box>
                       <StatusChip status={g.status} />
                     </Stack>

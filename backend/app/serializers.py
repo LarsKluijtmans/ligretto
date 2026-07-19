@@ -11,6 +11,12 @@ from .schemas import (
     RoundOut,
     RoundScoreOut,
 )
+from .services.player_directory_service import display_name_for
+
+
+def _host_name(game: Game) -> str | None:
+    """Public display name of the game's creator (email local-part fallback, never the raw email)."""
+    return display_name_for(game.host) if game.host is not None else None
 
 
 def _totals(game: Game) -> dict[int, int]:
@@ -46,6 +52,7 @@ def to_summary(game: Game) -> GameSummary:
         player_count=len(game.players),
         current_round=len(game.rounds),
         leader_name=leader_name,
+        host_name=_host_name(game),
         created_at=game.created_at,
     )
 
@@ -98,6 +105,7 @@ def to_detail(game: Game, viewer_player_id: int | None = None) -> GameDetail:
         rounds=rounds,
         leader=leader_ids,
         leader_name=leader_name,
+        host_name=_host_name(game),
         winner=game.winner_game_player_id,
         game_over=game_over,
         is_host=viewer_player_id is not None and game.host_player_id == viewer_player_id,
