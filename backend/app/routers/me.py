@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends
 
+from ..admin_guard import is_admin
 from ..config import settings
 from ..deps import player_service
 from ..models import Player
@@ -18,7 +19,7 @@ from ..services.player_service import PlayerService
 router = APIRouter(prefix="/api/v1", tags=["me"])
 
 
-def _me_out(player: Player) -> MeOut:
+def _me_out(player: Player, admin: bool = False) -> MeOut:
     return MeOut(
         sub=player.sub,
         display_name=player.display_name,
@@ -27,6 +28,7 @@ def _me_out(player: Player) -> MeOut:
         icon_value=player.icon_value,
         avatar_data_url=player.avatar_data_url,
         language=player.language,
+        is_admin=admin,
     )
 
 
@@ -59,7 +61,7 @@ def get_me(
         project_id=principal.project_id,
         metadata={"sub": principal.sub},
     )
-    return _me_out(player)
+    return _me_out(player, is_admin(principal))
 
 
 @router.patch("/me/profile", response_model=MeOut)
@@ -82,4 +84,4 @@ def update_profile(
         project_id=principal.project_id,
         metadata={"sub": principal.sub, "icon_type": body.icon_type},
     )
-    return _me_out(player)
+    return _me_out(player, is_admin(principal))

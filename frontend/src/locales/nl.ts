@@ -17,6 +17,7 @@ export const nl: AppResources = {
       dashboard: "Spellen",
       rules: "Spelregels",
       history: "Historie",
+      insights: "Inzichten",
     },
 
     menu: {
@@ -148,6 +149,19 @@ export const nl: AppResources = {
       empty: "Nog geen spellen in je historie.",
       loadMore: "Meer laden",
       open: "Details",
+    },
+
+    insights: {
+      title: "Inzichten",
+      subtitle: "Hoe het gaat met de spellen van iedereen die Ligretto gebruikt.",
+      created: "Aangemaakt",
+      inProgress: "Bezig",
+      finished: "Afgerond",
+      abandoned: "Gestaakt",
+      finishRate: "Afrondingspercentage (van beëindigde spellen)",
+      source: "Aantallen komen uit de usage-stream van het platform.",
+      unavailable:
+        "Er zijn nog geen usage-cijfers — er zijn geen spellen geregistreerd, of usage-toegang staat uit.",
     },
 
     stats: {

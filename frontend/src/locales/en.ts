@@ -15,6 +15,7 @@ export const en = {
       dashboard: "Games",
       rules: "Rules",
       history: "History",
+      insights: "Insights",
     },
 
     menu: {
@@ -146,6 +147,19 @@ export const en = {
       empty: "No games in your history yet.",
       loadMore: "Load more",
       open: "Details",
+    },
+
+    insights: {
+      title: "Insights",
+      subtitle: "How games are going across everyone using Ligretto.",
+      created: "Created",
+      inProgress: "In progress",
+      finished: "Finished",
+      abandoned: "Abandoned",
+      finishRate: "Finish rate (of games that ended)",
+      source: "Counts come from the platform's usage stream.",
+      unavailable:
+        "Usage metrics aren't available yet — no games have been recorded, or usage access isn't enabled.",
     },
 
     stats: {

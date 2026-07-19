@@ -37,8 +37,9 @@ class Settings(BaseSettings):
 
     # --- Behaviour toggles ------------------------------------------------------
     enable_enrichment: bool = True          # call auth-api to enrich the profile
-    enable_project_logging: bool = True     # ship events to logs-api
-    log_category: str = "app-starter"       # category stamped on every log event
+    enable_project_logging: bool = True     # ship error/warning logs to logs-api
+    enable_usage_events: bool = True        # meter game lifecycle to logs-api /usage/features
+    log_category: str = "ligretto"          # category stamped on every log event
     jwks_cache_seconds: int = 300           # honor the JWKS Cache-Control max-age
 
     # Comma-separated browser origins allowed to call this API (CORS).

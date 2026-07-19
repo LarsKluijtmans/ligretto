@@ -7,12 +7,14 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from .config import settings
 from .database import init_db
-from .routers import events, games, history, invitations, logs, me, players
+from .project_logger import log_event
+from .routers import events, games, history, insights, invitations, logs, me, players
 
 
 @asynccontextmanager
@@ -39,6 +41,24 @@ app.include_router(logs.router)
 app.include_router(players.router)
 app.include_router(invitations.router)
 app.include_router(events.router)
+app.include_router(insights.router)
+
+
+@app.exception_handler(Exception)
+async def _log_unhandled(request: Request, exc: Exception) -> JSONResponse:
+    """Last-resort handler: ship every UNHANDLED 500 to logs-api as an error (best-effort), then
+    return a generic body. Expected 4xx (ServiceError -> HTTPException) are handled in the routers
+    and never reach here, so this stays quiet except on real bugs."""
+    log_event(
+        "error",
+        f"Unhandled error: {type(exc).__name__}: {exc}",
+        metadata={
+            "component": "api",
+            "operation": f"{request.method} {request.url.path}",
+            "error_type": type(exc).__name__,
+        },
+    )
+    return JSONResponse(status_code=500, content={"detail": "Internal Server Error"})
 
 
 @app.get("/health")

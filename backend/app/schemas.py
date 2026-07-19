@@ -56,6 +56,7 @@ class MeOut(BaseModel):
     icon_value: str | None = None
     avatar_data_url: str | None = None
     language: str | None = None
+    is_admin: bool = False  # carries the platform `admin: true` claim → unlocks the Insights tab
 
 
 class PlayerCard(BaseModel):
@@ -216,3 +217,14 @@ class StatsOut(BaseModel):
     win_rate: float
     avg_score: float
     best_round: int
+
+
+class AdminUsageOut(BaseModel):
+    """App-wide game-lifecycle counts, read back from the platform's feature-usage stream.
+    `available` is False when the counts couldn't be read (usage not granted / logs-api down)."""
+
+    created: int = 0
+    finished: int = 0
+    abandoned: int = 0
+    in_progress: int = 0  # created - (finished + abandoned), clamped at 0
+    available: bool = False

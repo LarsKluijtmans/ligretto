@@ -24,6 +24,16 @@ export type Me = {
   icon_value: string | null;
   avatar_data_url: string | null;
   language: string | null;
+  is_admin: boolean; // carries the platform `admin: true` claim → unlocks the Insights tab
+};
+
+// App-wide game-lifecycle counts (admin-only), read back from the platform's usage stream.
+export type AdminUsage = {
+  created: number;
+  finished: number;
+  abandoned: number;
+  in_progress: number;
+  available: boolean;
 };
 
 // A profile edit. For icon_type "emoji"/"preset" send icon_value; for "image" send avatar_data_url
@@ -261,6 +271,9 @@ export const api = {
     request<GameListItem[]>(`/api/v1/history?limit=${limit}&offset=${offset}`, getToken),
 
   myStats: (getToken: TokenGetter) => request<MyStats>("/api/v1/stats/me", getToken),
+
+  // Admin-only: app-wide game-lifecycle counts from the platform usage stream (403 if not admin).
+  adminUsage: (getToken: TokenGetter) => request<AdminUsage>("/api/v1/admin/usage", getToken),
 };
 
 // ---------------------------------------------------------------------------------------------

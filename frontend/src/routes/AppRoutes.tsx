@@ -3,6 +3,7 @@ import { AppShell } from "../components/AppShell";
 import { DashboardPage } from "../pages/DashboardPage";
 import { GamePage } from "../pages/GamePage";
 import { HistoryPage } from "../pages/HistoryPage";
+import { InsightsPage } from "../pages/InsightsPage";
 import { NewGamePage } from "../pages/NewGamePage";
 import { ProfilePage } from "../pages/ProfilePage";
 import { RulesPage } from "../pages/RulesPage";
@@ -17,6 +18,7 @@ export function AppRoutes() {
         <Route path="games/:id" element={<GamePage />} />
         <Route path="rules" element={<RulesPage />} />
         <Route path="history" element={<HistoryPage />} />
+        <Route path="insights" element={<InsightsPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

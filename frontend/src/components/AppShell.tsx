@@ -17,7 +17,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { BookOpen, History as HistoryIcon, LayoutGrid, LogOut, User } from "lucide-react";
+import { BarChart3, BookOpen, History as HistoryIcon, LayoutGrid, LogOut, User } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -50,7 +50,9 @@ export function AppShell() {
     ? "/rules"
     : path.startsWith("/history")
       ? "/history"
-      : "/";
+      : path.startsWith("/insights")
+        ? "/insights"
+        : "/";
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default", pb: 9 }}>
@@ -164,6 +166,13 @@ export function AppShell() {
             value="/rules"
             icon={<BookOpen size={22} />}
           />
+          {me?.is_admin && (
+            <BottomNavigationAction
+              label={t("nav.insights")}
+              value="/insights"
+              icon={<BarChart3 size={22} />}
+            />
+          )}
         </BottomNavigation>
       </Paper>
     </Box>

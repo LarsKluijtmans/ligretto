@@ -16,9 +16,11 @@ from ..schemas import (
     Ok,
     RoundScoresIn,
 )
+from ..security import Principal, verify_token
 from ..serializers import to_detail, to_summary
 from ..services.errors import ServiceError
 from ..services.game_service import GameService
+from ..services.usage_notifier import record_usage
 
 router = APIRouter(prefix="/api/v1", tags=["games"])
 
@@ -39,12 +41,19 @@ def list_games(
 def create_game(
     body: CreateGameIn,
     me: Player = Depends(current_player),
+    principal: Principal = Depends(verify_token),
     games: GameService = Depends(game_service),
 ) -> GameDetail:
     try:
         game = games.create_game(me.id, body)
     except ServiceError as exc:
         raise _handle(exc)
+    record_usage(
+        "game_created",
+        subject=me.sub,
+        project_id=principal.project_id,
+        metadata={"game_id": game.id, "players": len(game.players), "target_type": game.target_type},
+    )
     return to_detail(game, me.id)
 
 
@@ -117,21 +126,37 @@ def correct_round(
 def finish_game(
     game_id: int,
     me: Player = Depends(current_player),
+    principal: Principal = Depends(verify_token),
     games: GameService = Depends(game_service),
 ) -> GameDetail:
     try:
-        return to_detail(games.finish_game(game_id, me.id), me.id)
+        game = games.finish_game(game_id, me.id)
     except ServiceError as exc:
         raise _handle(exc)
+    record_usage(
+        "game_finished",
+        subject=me.sub,
+        project_id=principal.project_id,
+        metadata={"game_id": game.id, "rounds": len(game.rounds)},
+    )
+    return to_detail(game, me.id)
 
 
 @router.post("/games/{game_id}/abandon", response_model=GameDetail)
 def abandon_game(
     game_id: int,
     me: Player = Depends(current_player),
+    principal: Principal = Depends(verify_token),
     games: GameService = Depends(game_service),
 ) -> GameDetail:
     try:
-        return to_detail(games.abandon_game(game_id, me.id), me.id)
+        game = games.abandon_game(game_id, me.id)
     except ServiceError as exc:
         raise _handle(exc)
+    record_usage(
+        "game_abandoned",
+        subject=me.sub,
+        project_id=principal.project_id,
+        metadata={"game_id": game.id, "rounds": len(game.rounds)},
+    )
+    return to_detail(game, me.id)
