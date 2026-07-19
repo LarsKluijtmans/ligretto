@@ -33,6 +33,30 @@ export const nl: AppResources = {
       noGames: "Nog geen spellen",
     },
 
+    invites: {
+      title: "Uitnodigingen",
+      empty: "Geen openstaande uitnodigingen.",
+      from: "{{name}} nodigde je uit",
+      aGame: "Een spel",
+      accept: "Accepteren",
+      decline: "Weigeren",
+      invitePlayers: "Spelers uitnodigen",
+      invitePlayersHint: "Zoek Ligretto-spelers om uit te nodigen. Ze doen mee zodra ze accepteren.",
+      invite: "Uitnodigen",
+      invited: "Uitgenodigd",
+      sent: "{{name}} uitgenodigd",
+      invitedPlayers: "Uitgenodigd",
+      cancel: "Uitnodiging annuleren",
+      liveToast: "{{name}} nodigde je uit voor een spel",
+      someone: "Iemand",
+      status: {
+        pending: "In afwachting",
+        accepted: "Geaccepteerd",
+        declined: "Geweigerd",
+        cancelled: "Geannuleerd",
+      },
+    },
+
     dashboard: {
       title: "Mijn spellen",
       subtitle: "Spellen die jij host",

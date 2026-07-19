@@ -1,8 +1,12 @@
 # Bolt 013 — mobile-invites-and-stats
 
-- **Intent:** 002-player-invites-and-stats · **Unit:** 009 mobile-invites-and-stats *(optional parity)* · **Status:** planned
-- **Created:** 2026-07-18T23:18:46Z
+- **Intent:** 002-player-invites-and-stats · **Unit:** 009 mobile-invites-and-stats *(optional parity)* · **Status:** N/A — no mobile app in repo
+- **Created:** 2026-07-18T23:18:46Z · **Closed:** 2026-07-19T07:40:53Z
 - **Depends on:** 011 game-invitations-api, 010 player-directory (API)
+
+> **N/A (2026-07-19):** intent 001 planned a mobile client (unit 006) but **no mobile/Expo app exists in
+> this repo** — nothing to extend. Skipped. If a mobile app is ever added, mirror bolt 012's flows over the
+> same `/api/v1` contract (search/invite, pending-invites accept/decline) and use Expo push for S-010-3.
 
 ## Goal
 Native mobile parity for search + invite + accept/decline + shared stats — over the SAME `ligretto-api`.

@@ -4,6 +4,7 @@ import { Box, CircularProgress } from "@mui/material";
 import { BrowserRouter } from "react-router-dom";
 import { authConfig } from "../authConfig";
 import { useBranding } from "../branding/BrandingThemeProvider";
+import { InvitationsProvider } from "../invitations/InvitationsContext";
 import { ProfileProvider } from "../profile/ProfileContext";
 import { AppRoutes } from "../routes/AppRoutes";
 
@@ -40,9 +41,11 @@ export function Gate() {
 
   return (
     <ProfileProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <InvitationsProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </InvitationsProvider>
     </ProfileProvider>
   );
 }

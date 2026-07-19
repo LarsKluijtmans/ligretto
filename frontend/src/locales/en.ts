@@ -31,6 +31,30 @@ export const en = {
       noGames: "No games yet",
     },
 
+    invites: {
+      title: "Invitations",
+      empty: "No pending invitations.",
+      from: "{{name}} invited you",
+      aGame: "A game",
+      accept: "Accept",
+      decline: "Decline",
+      invitePlayers: "Invite players",
+      invitePlayersHint: "Search Ligretto players to invite. They join once they accept.",
+      invite: "Invite",
+      invited: "Invited",
+      sent: "Invited {{name}}",
+      invitedPlayers: "Invited",
+      cancel: "Cancel invite",
+      liveToast: "{{name}} invited you to a game",
+      someone: "Someone",
+      status: {
+        pending: "Pending",
+        accepted: "Accepted",
+        declined: "Declined",
+        cancelled: "Cancelled",
+      },
+    },
+
     dashboard: {
       title: "My games",
       subtitle: "Games you host",

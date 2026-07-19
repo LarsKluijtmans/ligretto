@@ -22,6 +22,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useBranding } from "../branding/BrandingThemeProvider";
+import { InvitationsBell } from "../invitations/InvitationsBell";
 import { PlayerAvatar } from "../profile/PlayerAvatar";
 import { useProfile } from "../profile/ProfileContext";
 
@@ -77,6 +78,7 @@ export function AppShell() {
               </Typography>
             </Box>
           </Stack>
+          <InvitationsBell />
           <Tooltip title={me?.display_name || t("menu.account")}>
             <IconButton
               onClick={(e) => setMenuAnchor(e.currentTarget)}

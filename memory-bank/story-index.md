@@ -30,7 +30,7 @@ Global index (single-file mode). Intent **001-ligretto-scorekeeper**. Status leg
 
 ---
 
-Intent **002-player-invites-and-stats**. Status legend: ⬜ planned · ✅ done.
+Intent **002-player-invites-and-stats**. Status legend: ⬜ planned · ✅ done · ◑ partial · ∅ N/A.
 
 | Story | Unit | Bolt | Summary | Status |
 |---|---|---|---|---|
@@ -40,12 +40,14 @@ Intent **002-player-invites-and-stats**. Status legend: ⬜ planned · ✅ done.
 | S-008-1 | 008 game-invitations | 011 | Invitation domain + host actions | ✅ |
 | S-008-2 | 008 game-invitations | 011 | Invitee accept / decline | ✅ |
 | S-008-3 | 008 game-invitations | 011 | Consent-safe stats + history wiring | ✅ |
-| S-008-4 | 008 game-invitations | 012 | Invite + pending-invites UI (web) | ⬜ |
-| S-010-1 | 010 realtime-invite-notifications | 014 | Backend SSE event stream + publish on invite | ⬜ |
-| S-010-3 | 010 realtime-invite-notifications | 014 | Away push + email on invite (notification-api) | ⬜ |
-| S-010-2 | 010 realtime-invite-notifications | 015 | Web live toast + pending-invites badge | ⬜ |
-| S-009-1 | 009 mobile-invites-and-stats | 013 | Mobile search + invite *(optional)* | ⬜ |
-| S-009-2 | 009 mobile-invites-and-stats | 013 | Mobile pending-invites + accept/decline *(optional)* | ⬜ |
+| S-008-4 | 008 game-invitations | 012 | Invite + pending-invites UI (web) | ✅ |
+| S-010-1 | 010 realtime-invite-notifications | 014 | Backend SSE event stream + publish on invite | ✅ |
+| S-010-3 | 010 realtime-invite-notifications | 014 | Away push + email (◑ hook only — needs notification-api) | ◑ |
+| S-010-2 | 010 realtime-invite-notifications | 015 | Web live toast + pending-invites badge | ✅ |
+| S-009-1 | 009 mobile-invites-and-stats | 013 | Mobile search + invite (∅ no mobile app in repo) | ∅ |
+| S-009-2 | 009 mobile-invites-and-stats | 013 | Mobile pending-invites + accept/decline (∅ no mobile app) | ∅ |
 
-**Intent 002 totals:** 4 units · 12 stories · 6 bolts (010–015; bolt 013 mobile is optional parity).
+**Intent 002 totals:** 4 units · 12 stories · 6 bolts (010–015). **Delivered:** 010, 011, 012, 014, 015
+DONE (S-010-3 away-push is a non-blocking hook — delivery needs notification-api wiring); **013 mobile N/A**
+(no mobile app in the repo).
 

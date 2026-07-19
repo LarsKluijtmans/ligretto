@@ -1,8 +1,13 @@
 # Bolt 012 — game-invitations-web
 
-- **Intent:** 002-player-invites-and-stats · **Unit:** 008 game-invitations · **Status:** planned
-- **Created:** 2026-07-18T23:18:46Z
+- **Intent:** 002-player-invites-and-stats · **Unit:** 008 game-invitations · **Status:** done
+- **Created:** 2026-07-18T23:18:46Z · **Completed:** 2026-07-19T07:40:53Z
 - **Depends on:** 011 game-invitations-api, 010 player-directory
+
+> **Done (2026-07-19):** GamePage "Invite players" section (setup only) — PlayerSearchField with a
+> per-card **Invite** button + host invite-status list (pending/accepted/declined) + cancel. Top-bar
+> **InvitationsBell** (badge + menu) with accept/decline (accept → navigates to the game).
+> InvitationsProvider loads `GET /invitations`. api client + EN/NL. Built + deployed live.
 
 ## Goal
 The web UI for inviting players and for responding to invitations.

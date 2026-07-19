@@ -48,6 +48,25 @@ export type PlayerCardData = {
   games_played: number;
 };
 
+export type InvitationStatus = "pending" | "accepted" | "declined" | "cancelled";
+
+// Host's view of an invitation for their game.
+export type GameInvitation = {
+  id: number;
+  status: InvitationStatus;
+  created_at: string;
+  invitee: PlayerCardData;
+};
+
+// Invitee's view of a pending invitation (no scores).
+export type PendingInvite = {
+  id: number;
+  game_id: number;
+  game_name: string | null;
+  inviter: PlayerCardData;
+  created_at: string;
+};
+
 export type GameListItem = {
   id: string;
   name: string | null;
@@ -171,6 +190,27 @@ export const api = {
   // Search existing Ligretto players by name or email (min 2 chars, capped). Never returns email.
   searchPlayers: (getToken: TokenGetter, q: string) =>
     request<PlayerCardData[]>(`/api/v1/players/search?q=${encodeURIComponent(q)}`, getToken),
+
+  // Invitations — host side (scoped to their game)
+  invitePlayer: (getToken: TokenGetter, gameId: string, inviteeId: string) =>
+    request<GameInvitation>(`/api/v1/games/${gameId}/invitations`, getToken, {
+      method: "POST",
+      body: JSON.stringify({ invitee_id: inviteeId }),
+    }),
+  listGameInvitations: (getToken: TokenGetter, gameId: string) =>
+    request<GameInvitation[]>(`/api/v1/games/${gameId}/invitations`, getToken),
+  cancelInvitation: (getToken: TokenGetter, gameId: string, invitationId: number) =>
+    request<void>(`/api/v1/games/${gameId}/invitations/${invitationId}`, getToken, {
+      method: "DELETE",
+    }),
+
+  // Invitations — invitee side
+  myInvitations: (getToken: TokenGetter) =>
+    request<PendingInvite[]>("/api/v1/invitations", getToken),
+  acceptInvitation: (getToken: TokenGetter, invitationId: number) =>
+    request<void>(`/api/v1/invitations/${invitationId}/accept`, getToken, { method: "POST" }),
+  declineInvitation: (getToken: TokenGetter, invitationId: number) =>
+    request<void>(`/api/v1/invitations/${invitationId}/decline`, getToken, { method: "POST" }),
 
   // Games
   listGames: (getToken: TokenGetter) => request<GameListItem[]>("/api/v1/games", getToken),

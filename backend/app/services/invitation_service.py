@@ -9,11 +9,13 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from ..event_bus import event_bus
 from ..models import GameInvitation, GamePlayer, Player
 from ..repositories.game import GameRepository
 from ..repositories.invitation import InvitationRepository
 from ..repositories.player import PlayerRepository
 from ..schemas import InvitationOut, PendingInviteOut
+from ..services.invite_notifier import notify_invited_away
 from ..services.player_directory_service import display_name_for, to_player_card
 from ..services.stats_service import StatsService
 from .errors import BadRequest, Conflict, NotFound
@@ -75,6 +77,20 @@ class InvitationService:
         )
         self.invitations.add(inv)
         self.invitations.commit()
+
+        # Real-time (bolt 014): push to the invitee's live sessions (SSE) + best-effort away
+        # notification. Both are non-blocking — the invite is already committed.
+        inviter = self.players.get(host_player_id)
+        event_bus.publish(
+            invitee.id,
+            {
+                "type": "invitation.created",
+                "game_id": game_id,
+                "game_name": game.name,
+                "inviter_name": display_name_for(inviter) if inviter else "A player",
+            },
+        )
+        notify_invited_away(inviter, invitee, game)
         return self._to_out(inv, invitee)
 
     def list_for_game(self, game_id: int, host_player_id: int) -> list[InvitationOut]:

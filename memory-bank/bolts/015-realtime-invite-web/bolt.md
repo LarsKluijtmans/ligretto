@@ -1,8 +1,13 @@
 # Bolt 015 — realtime-invite-web
 
-- **Intent:** 002-player-invites-and-stats · **Unit:** 010 realtime-invite-notifications · **Status:** planned
-- **Created:** 2026-07-18T23:18:46Z
+- **Intent:** 002-player-invites-and-stats · **Unit:** 010 realtime-invite-notifications · **Status:** done
+- **Created:** 2026-07-18T23:18:46Z · **Completed:** 2026-07-19T07:40:53Z
 - **Depends on:** 014 realtime-invite-backend, 012 game-invitations-web
+
+> **Done (2026-07-19):** InvitationsProvider subscribes to `/events` via a **fetch-stream** (Bearer via
+> header, not token-in-URL), parses SSE frames, and on `invitation.created` pops a live **toast** +
+> bumps the pending-invites badge (re-pulls the authoritative list); reconnects with backoff and
+> reconciles on reconnect. EN/NL. CSP connect-src already allows the API host. Built + deployed live.
 
 ## Goal
 The web live experience: an instant toast + a live pending-invites badge when you're invited.

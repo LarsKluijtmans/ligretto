@@ -1,8 +1,15 @@
 # Bolt 014 — realtime-invite-backend
 
-- **Intent:** 002-player-invites-and-stats · **Unit:** 010 realtime-invite-notifications · **Status:** planned
-- **Created:** 2026-07-18T23:18:46Z
+- **Intent:** 002-player-invites-and-stats · **Unit:** 010 realtime-invite-notifications · **Status:** done (S-010-3 partial)
+- **Created:** 2026-07-18T23:18:46Z · **Completed:** 2026-07-19T07:40:53Z
 - **Depends on:** 011 game-invitations-api
+
+> **Done (2026-07-19):** S-010-1 — authenticated SSE `GET /api/v1/events` + in-process per-user pub/sub
+> (`app/event_bus.py`, thread-safe publish via call_soon_threadsafe); `InvitationService.invite()`
+> publishes `invitation.created` to the invitee. Deployed; endpoint auth-guarded (401). 41 tests still pass.
+> **S-010-3 PARTIAL:** away email/mobile-push is a NON-BLOCKING hook only (`invite_notifier.notify_invited_away`,
+> logs the intent). Actual delivery needs notification-api wired into this backend (NOTIFICATION_API_URL +
+> M2M `notifications:send` + a "you've been invited" EN/NL template) — I can't provision/verify that from here.
 
 ## Goal
 Deliver an invite the instant it's sent: a live SSE event stream + an away email/mobile-push.

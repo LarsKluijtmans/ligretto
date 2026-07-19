@@ -21,16 +21,18 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { ArrowLeft, Ban, Crown, Flag, Pencil, Plus } from "lucide-react";
+import { ArrowLeft, Ban, Crown, Flag, Pencil, Plus, UserPlus, X } from "lucide-react";
 import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, leaderIds, targetReached } from "../api/backend";
-import type { GameDetail, RoundScoreInput } from "../api/backend";
+import type { GameDetail, GameInvitation, PlayerCardData, RoundScoreInput } from "../api/backend";
 import { AsyncBoundary } from "../components/AsyncBoundary";
+import { PlayerSearchField } from "../components/PlayerSearchField";
 import { RoundEntryForm } from "../components/RoundEntryForm";
 import { StatusChip } from "../components/StatusChip";
 import { useAsync } from "../hooks/useAsync";
+import { PlayerAvatar } from "../profile/PlayerAvatar";
 
 export function GamePage() {
   const { t } = useTranslation("app");
@@ -245,6 +247,9 @@ function GameBody({
       )}
       {game.status === "abandoned" && <Alert severity="warning">{t("game.abandonedNote")}</Alert>}
 
+      {/* Invite real players (setup only — before round 1 is scored) */}
+      {active && game.rounds.length === 0 && <InvitePlayersSection gameId={game.id} />}
+
       {/* Standings */}
       <Card>
         <CardContent>
@@ -420,5 +425,111 @@ function GameBody({
         </Typography>
       )}
     </Stack>
+  );
+}
+
+// Setup-time invitations: search Ligretto players and invite them. They join (and their stats count)
+// only once they accept — so this shows the invite status rather than seating them directly.
+function InvitePlayersSection({ gameId }: { gameId: string }) {
+  const { t } = useTranslation("app");
+  const { getAccessToken } = useAuth();
+  const load = useCallback(
+    () => api.listGameInvitations(getAccessToken, gameId),
+    [getAccessToken, gameId],
+  );
+  const { data: invites, reload } = useAsync<GameInvitation[]>(load, [gameId]);
+  const [feedback, setFeedback] = useState<{ severity: "info" | "error"; msg: string } | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const invite = async (p: PlayerCardData) => {
+    setBusy(p.id);
+    setFeedback(null);
+    try {
+      await api.invitePlayer(getAccessToken, gameId, p.id);
+      reload();
+      setFeedback({ severity: "info", msg: t("invites.sent", { name: p.display_name }) });
+    } catch (e) {
+      setFeedback({ severity: "error", msg: e instanceof Error ? e.message : String(e) });
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const cancel = async (id: number) => {
+    try {
+      await api.cancelInvitation(getAccessToken, gameId, id);
+    } catch {
+      /* ignore — reload reflects reality */
+    }
+    reload();
+  };
+
+  const active = new Set(
+    (invites ?? [])
+      .filter((i) => i.status === "pending" || i.status === "accepted")
+      .map((i) => i.invitee.id),
+  );
+
+  return (
+    <Card>
+      <CardContent>
+        <Typography variant="h6" sx={{ mb: 0.5 }}>
+          {t("invites.invitePlayers")}
+        </Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+          {t("invites.invitePlayersHint")}
+        </Typography>
+        <PlayerSearchField
+          renderAction={(p) => (
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<UserPlus size={16} />}
+              disabled={busy === p.id || active.has(p.id)}
+              onClick={() => void invite(p)}
+            >
+              {active.has(p.id) ? t("invites.invited") : t("invites.invite")}
+            </Button>
+          )}
+        />
+        {feedback && (
+          <Alert severity={feedback.severity} sx={{ mt: 1.5 }} onClose={() => setFeedback(null)}>
+            {feedback.msg}
+          </Alert>
+        )}
+        {invites && invites.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              {t("invites.invitedPlayers")}
+            </Typography>
+            <Stack spacing={1}>
+              {invites.map((inv) => (
+                <Stack
+                  key={inv.id}
+                  direction="row"
+                  spacing={1}
+                  sx={{ alignItems: "center", p: 1, borderRadius: 2, bgcolor: "action.hover" }}
+                >
+                  <PlayerAvatar source={inv.invitee} size={30} />
+                  <Typography sx={{ flexGrow: 1 }} noWrap>
+                    {inv.invitee.display_name}
+                  </Typography>
+                  <Chip size="small" variant="outlined" label={t(`invites.status.${inv.status}`)} />
+                  {inv.status === "pending" && (
+                    <IconButton
+                      size="small"
+                      aria-label={t("invites.cancel")}
+                      onClick={() => void cancel(inv.id)}
+                    >
+                      <X size={16} />
+                    </IconButton>
+                  )}
+                </Stack>
+              ))}
+            </Stack>
+          </Box>
+        )}
+      </CardContent>
+    </Card>
   );
 }
