@@ -49,6 +49,7 @@ export const nl: AppResources = {
       cancel: "Uitnodiging annuleren",
       liveToast: "{{name}} nodigde je uit voor een spel",
       someone: "Iemand",
+      willInvite: "Wordt uitgenodigd wanneer je het spel aanmaakt",
       status: {
         pending: "In afwachting",
         accepted: "Geaccepteerd",

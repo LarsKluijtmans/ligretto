@@ -14,13 +14,14 @@ import {
   ToggleButtonGroup,
   Typography,
 } from "@mui/material";
-import { Trash2, UserPlus, User as UserIcon } from "lucide-react";
+import { Trash2, UserPlus, X, User as UserIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/backend";
-import type { NewPlayerInput, TargetType } from "../api/backend";
+import type { NewPlayerInput, PlayerCardData, TargetType } from "../api/backend";
 import { PlayerSearchField } from "../components/PlayerSearchField";
+import { PlayerAvatar } from "../profile/PlayerAvatar";
 
 const MIN_PLAYERS = 2;
 const MAX_PLAYERS = 10;
@@ -36,10 +37,15 @@ export function NewGamePage() {
   const [players, setPlayers] = useState<NewPlayerInput[]>([]);
   const [guestName, setGuestName] = useState("");
   const [myName, setMyName] = useState<string>("");
+  const [invitees, setInvitees] = useState<PlayerCardData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const hasMe = players.some((p) => p.kind === "account");
+
+  const stageInvite = (p: PlayerCardData) =>
+    setInvitees((xs) => (xs.some((x) => x.id === p.id) ? xs : [...xs, p]));
+  const unstageInvite = (id: string) => setInvitees((xs) => xs.filter((x) => x.id !== id));
 
   // Load my display name so "Add me" seats an account player with the right label.
   const loadMe = useCallback(() => api.getMe(getAccessToken), [getAccessToken]);
@@ -89,6 +95,12 @@ export function NewGamePage() {
         target_value: targetValue,
         players,
       });
+      // Send invitations for the staged players (best-effort — the game page shows each status).
+      if (invitees.length > 0) {
+        await Promise.allSettled(
+          invitees.map((p) => api.invitePlayer(getAccessToken, game.id, p.id)),
+        );
+      }
       navigate(`/games/${game.id}`, { replace: true });
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
@@ -232,12 +244,56 @@ export function NewGamePage() {
 
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" sx={{ mb: 0.5 }}>
-            {t("players.findTitle")}
+            {t("invites.invitePlayers")}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            {t("players.findHint")}
+            {t("invites.invitePlayersHint")}
           </Typography>
-          <PlayerSearchField />
+          <PlayerSearchField
+            renderAction={(p) => {
+              const staged = invitees.some((x) => x.id === p.id);
+              return (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<UserPlus size={16} />}
+                  disabled={staged}
+                  onClick={() => stageInvite(p)}
+                >
+                  {staged ? t("invites.invited") : t("invites.invite")}
+                </Button>
+              );
+            }}
+          />
+          {invitees.length > 0 && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                {t("invites.willInvite")}
+              </Typography>
+              <Stack spacing={1}>
+                {invitees.map((p) => (
+                  <Stack
+                    key={p.id}
+                    direction="row"
+                    spacing={1}
+                    sx={{ alignItems: "center", p: 1, borderRadius: 2, bgcolor: "action.hover" }}
+                  >
+                    <PlayerAvatar source={p} size={30} />
+                    <Typography sx={{ flexGrow: 1 }} noWrap>
+                      {p.display_name}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      aria-label={t("invites.cancel")}
+                      onClick={() => unstageInvite(p.id)}
+                    >
+                      <X size={16} />
+                    </IconButton>
+                  </Stack>
+                ))}
+              </Stack>
+            </Box>
+          )}
         </CardContent>
       </Card>
 

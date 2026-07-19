@@ -47,6 +47,7 @@ export const en = {
       cancel: "Cancel invite",
       liveToast: "{{name}} invited you to a game",
       someone: "Someone",
+      willInvite: "Will be invited when you create the game",
       status: {
         pending: "Pending",
         accepted: "Accepted",
