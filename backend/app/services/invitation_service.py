@@ -15,6 +15,7 @@ from ..repositories.game import GameRepository
 from ..repositories.invitation import InvitationRepository
 from ..repositories.player import PlayerRepository
 from ..schemas import InvitationOut, PendingInviteOut
+from ..services.game_service import game_participants
 from ..services.invite_notifier import notify_invited_away
 from ..services.player_directory_service import display_name_for, to_player_card
 from ..services.stats_service import StatsService
@@ -162,6 +163,9 @@ class InvitationService:
         inv.status = "accepted"
         inv.responded_at = _utcnow()
         self.invitations.commit()
+        # Real-time: the roster changed — refresh every participant's open game view (+ the new player).
+        for pid in game_participants(game) | {invitee_player_id}:
+            event_bus.publish(pid, {"type": "game.updated", "game_id": game.id})
 
     def decline(self, invitation_id: int, invitee_player_id: int) -> None:
         inv = self._own_pending(invitation_id, invitee_player_id)

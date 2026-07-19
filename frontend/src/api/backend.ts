@@ -112,6 +112,7 @@ export type GameDetail = {
   winner?: string | null;
   created_at?: string;
   completed_at?: string | null;
+  is_host: boolean; // only the host may score / finish / invite
 };
 
 export type MyStats = {

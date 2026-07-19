@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 import { ArrowLeft, Ban, Crown, Flag, Pencil, Plus, X } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, leaderIds, targetReached } from "../api/backend";
@@ -32,6 +32,7 @@ import { PlayerSearchField } from "../components/PlayerSearchField";
 import { RoundEntryForm } from "../components/RoundEntryForm";
 import { StatusChip } from "../components/StatusChip";
 import { useAsync } from "../hooks/useAsync";
+import { useInvitations } from "../invitations/InvitationsContext";
 import { PlayerAvatar } from "../profile/PlayerAvatar";
 
 export function GamePage() {
@@ -42,6 +43,14 @@ export function GamePage() {
 
   const load = useCallback(() => api.getGame(getAccessToken, id), [getAccessToken, id]);
   const { data: game, loading, error, reload } = useAsync<GameDetail>(load, [id]);
+
+  // Live updates: reload whenever a participant scores a round, joins, or finishes the game.
+  const { subscribeGame } = useInvitations();
+  useEffect(() => {
+    const gid = Number(id);
+    if (!Number.isFinite(gid) || gid <= 0) return;
+    return subscribeGame(gid, reload);
+  }, [id, subscribeGame, reload]);
 
   const [editing, setEditing] = useState<number | null>(null); // round number being edited
   const [adding, setAdding] = useState(false);
@@ -103,6 +112,7 @@ export function GamePage() {
           <GameBody
             game={game}
             active={game.status === "active"}
+            isHost={game.is_host}
             editing={editing}
             adding={adding}
             busy={busy}
@@ -129,7 +139,9 @@ export function GamePage() {
 
       {/* Finish prompt when the target has been reached. */}
       <Dialog
-        open={Boolean(game && game.status === "active" && targetReached(game) && !promptDismissed)}
+        open={Boolean(
+          game && game.is_host && game.status === "active" && targetReached(game) && !promptDismissed,
+        )}
         onClose={() => setPromptDismissed(true)}
       >
         <DialogTitle>{t("game.targetReached")}</DialogTitle>
@@ -173,6 +185,7 @@ export function GamePage() {
 function GameBody({
   game,
   active,
+  isHost,
   editing,
   adding,
   busy,
@@ -187,6 +200,7 @@ function GameBody({
 }: {
   game: GameDetail;
   active: boolean;
+  isHost: boolean;
   editing: number | null;
   adding: boolean;
   busy: boolean;
@@ -201,6 +215,7 @@ function GameBody({
 }) {
   const { t } = useTranslation("app");
 
+  const canScore = active && isHost; // only the host may score / edit / finish / invite
   const leaders = leaderIds(game.players);
   const byTotal = [...game.players].sort((a, b) => b.total - a.total);
   const seatOrder = [...game.players].sort((a, b) => a.seat - b.seat);
@@ -248,7 +263,7 @@ function GameBody({
       {game.status === "abandoned" && <Alert severity="warning">{t("game.abandonedNote")}</Alert>}
 
       {/* Invite real players (setup only — before round 1 is scored) */}
-      {active && game.rounds.length === 0 && <InvitePlayersSection gameId={game.id} />}
+      {canScore &&game.rounds.length === 0 && <InvitePlayersSection gameId={game.id} />}
 
       {/* Standings */}
       <Card>
@@ -310,7 +325,7 @@ function GameBody({
                         {p.display_name}
                       </TableCell>
                     ))}
-                    {active && <TableCell align="right" />}
+                    {canScore &&<TableCell align="right" />}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -327,7 +342,7 @@ function GameBody({
                             </TableCell>
                           );
                         })}
-                        {active && (
+                        {canScore &&(
                           <TableCell align="right" padding="none">
                             <IconButton
                               size="small"
@@ -356,7 +371,7 @@ function GameBody({
                         {p.total}
                       </TableCell>
                     ))}
-                    {active && <TableCell />}
+                    {canScore &&<TableCell />}
                   </TableRow>
                 </TableBody>
               </Table>
@@ -368,7 +383,7 @@ function GameBody({
       {mutError && <Alert severity="error">{mutError}</Alert>}
 
       {/* Round entry / edit */}
-      {active && editingRound && (
+      {canScore &&editingRound && (
         <RoundEntryForm
           players={seatOrder}
           roundNumber={editingRound.number}
@@ -379,7 +394,7 @@ function GameBody({
           onCancel={onCancelForm}
         />
       )}
-      {active && adding && !editingRound && (
+      {canScore &&adding && !editingRound && (
         <RoundEntryForm
           players={seatOrder}
           roundNumber={game.rounds.length + 1}
@@ -390,7 +405,7 @@ function GameBody({
       )}
 
       {/* Actions */}
-      {active && !adding && !editingRound && (
+      {canScore &&!adding && !editingRound && (
         <Stack spacing={1.5}>
           <Button startIcon={<Plus size={18} />} onClick={onAdd}>
             {t("game.addRound")}
@@ -417,6 +432,12 @@ function GameBody({
             </Button>
           </Stack>
         </Stack>
+      )}
+
+      {active && !isHost && (
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center" }}>
+          {t("game.onlyHostScores")}
+        </Typography>
       )}
 
       {game.status === "completed" && (

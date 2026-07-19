@@ -128,6 +128,7 @@ export const en = {
       finishNow: "Finish now",
       keepPlaying: "Keep playing",
       completedNote: "This game is finished.",
+      onlyHostScores: "Only the host can enter scores. This board updates live.",
       abandonedNote: "This game was abandoned.",
       winnerIs: "🏆 {{name}} wins!",
       seat: "Seat",

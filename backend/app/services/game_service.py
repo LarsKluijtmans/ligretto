@@ -12,11 +12,21 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from .. import scoring
+from ..event_bus import event_bus
 from ..models import Game, GamePlayer, RoundScore
 from ..repositories.game import GameRepository
 from ..repositories.round import RoundRepository
 from ..schemas import CreateGameIn, NewPlayerIn, ScoreEntryIn
 from .errors import BadRequest, Conflict, NotFound
+
+
+def game_participants(game: Game) -> set[int]:
+    """Everyone who should see a game's live updates: the host + accepted account players."""
+    ids = {game.host_player_id}
+    for gp in game.players:
+        if gp.player_id is not None:
+            ids.add(gp.player_id)
+    return ids
 
 MIN_PLAYERS = 2
 MAX_PLAYERS = 10
@@ -52,6 +62,11 @@ class GameService:
     @staticmethod
     def _first_round_scored(game: Game) -> bool:
         return any(rnd.scores for rnd in game.rounds)
+
+    def _publish_update(self, game: Game) -> None:
+        """Notify every participant the game changed, so open views refresh live. Best-effort."""
+        for pid in game_participants(game):
+            event_bus.publish(pid, {"type": "game.updated", "game_id": game.id})
 
     # --- lifecycle ---------------------------------------------------------------
 
@@ -126,7 +141,9 @@ class GameService:
             )
         )
         self.games.commit()
-        return self._require_game(game_id, host_player_id)
+        game = self._require_game(game_id, host_player_id)
+        self._publish_update(game)
+        return game
 
     def remove_player(
         self, game_id: int, host_player_id: int, game_player_id: int
@@ -143,7 +160,9 @@ class GameService:
             raise BadRequest(f"a game needs at least {MIN_PLAYERS} players")
         self.games.delete_game_player(target)
         self.games.commit()
-        return self._require_game(game_id, host_player_id)
+        game = self._require_game(game_id, host_player_id)
+        self._publish_update(game)
+        return game
 
     # --- rounds ------------------------------------------------------------------
 
@@ -193,7 +212,9 @@ class GameService:
         rnd = self.rounds.add(game.id, next_number)
         self._apply_scores(game, rnd.id, entries)
         self.games.commit()
-        return self._require_game(game_id, host_player_id)
+        game = self._require_game(game_id, host_player_id)
+        self._publish_update(game)
+        return game
 
     def correct_round(
         self,
@@ -213,7 +234,9 @@ class GameService:
         self.rounds.clear_scores(rnd.id)
         self._apply_scores(game, rnd.id, entries)
         self.games.commit()
-        return self._require_game(game_id, host_player_id)
+        game = self._require_game(game_id, host_player_id)
+        self._publish_update(game)
+        return game
 
     # --- finish / abandon --------------------------------------------------------
 
@@ -227,7 +250,9 @@ class GameService:
         game.status = "completed"
         game.completed_at = _utcnow()
         self.games.commit()
-        return self._require_game(game_id, host_player_id)
+        game = self._require_game(game_id, host_player_id)
+        self._publish_update(game)
+        return game
 
     def abandon_game(self, game_id: int, host_player_id: int) -> Game:
         game = self._require_game(game_id, host_player_id)
@@ -236,4 +261,6 @@ class GameService:
         game.status = "abandoned"
         game.completed_at = _utcnow()
         self.games.commit()
-        return self._require_game(game_id, host_player_id)
+        game = self._require_game(game_id, host_player_id)
+        self._publish_update(game)
+        return game

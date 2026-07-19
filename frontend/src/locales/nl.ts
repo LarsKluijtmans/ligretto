@@ -130,6 +130,7 @@ export const nl: AppResources = {
       finishNow: "Nu afronden",
       keepPlaying: "Doorspelen",
       completedNote: "Dit spel is afgerond.",
+      onlyHostScores: "Alleen de host kan scores invoeren. Dit bord werkt live bij.",
       abandonedNote: "Dit spel is gestaakt.",
       winnerIs: "🏆 {{name}} wint!",
       seat: "Plek",

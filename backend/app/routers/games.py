@@ -45,7 +45,7 @@ def create_game(
         game = games.create_game(me.id, body)
     except ServiceError as exc:
         raise _handle(exc)
-    return to_detail(game)
+    return to_detail(game, me.id)
 
 
 @router.get("/games/{game_id}", response_model=GameDetail)
@@ -55,7 +55,7 @@ def get_game(
     games: GameService = Depends(game_service),
 ) -> GameDetail:
     try:
-        return to_detail(games.get_game(game_id, me.id))
+        return to_detail(games.get_game(game_id, me.id), me.id)
     except ServiceError as exc:
         raise _handle(exc)
 
@@ -68,7 +68,7 @@ def add_player(
     games: GameService = Depends(game_service),
 ) -> GameDetail:
     try:
-        return to_detail(games.add_player(game_id, me.id, body))
+        return to_detail(games.add_player(game_id, me.id, body), me.id)
     except ServiceError as exc:
         raise _handle(exc)
 
@@ -81,7 +81,7 @@ def remove_player(
     games: GameService = Depends(game_service),
 ) -> GameDetail:
     try:
-        return to_detail(games.remove_player(game_id, me.id, game_player_id))
+        return to_detail(games.remove_player(game_id, me.id, game_player_id), me.id)
     except ServiceError as exc:
         raise _handle(exc)
 
@@ -94,7 +94,7 @@ def add_round(
     games: GameService = Depends(game_service),
 ) -> GameDetail:
     try:
-        return to_detail(games.add_round(game_id, me.id, body.scores))
+        return to_detail(games.add_round(game_id, me.id, body.scores), me.id)
     except ServiceError as exc:
         raise _handle(exc)
 
@@ -108,7 +108,7 @@ def correct_round(
     games: GameService = Depends(game_service),
 ) -> GameDetail:
     try:
-        return to_detail(games.correct_round(game_id, me.id, number, body.scores))
+        return to_detail(games.correct_round(game_id, me.id, number, body.scores), me.id)
     except ServiceError as exc:
         raise _handle(exc)
 
@@ -120,7 +120,7 @@ def finish_game(
     games: GameService = Depends(game_service),
 ) -> GameDetail:
     try:
-        return to_detail(games.finish_game(game_id, me.id))
+        return to_detail(games.finish_game(game_id, me.id), me.id)
     except ServiceError as exc:
         raise _handle(exc)
 
@@ -132,6 +132,6 @@ def abandon_game(
     games: GameService = Depends(game_service),
 ) -> GameDetail:
     try:
-        return to_detail(games.abandon_game(game_id, me.id))
+        return to_detail(games.abandon_game(game_id, me.id), me.id)
     except ServiceError as exc:
         raise _handle(exc)

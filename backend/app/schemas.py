@@ -195,6 +195,7 @@ class GameDetail(BaseModel):
     leader_name: str | None = None
     winner: int | None = None    # game_player_id of the winner, when completed
     game_over: bool = False
+    is_host: bool = False        # is the CALLER the host? (only the host may score/finish/invite)
 
 
 class StatsOut(BaseModel):

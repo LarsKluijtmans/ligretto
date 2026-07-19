@@ -23,6 +23,9 @@ type Ctx = {
   invites: PendingInvite[];
   loading: boolean;
   refresh: () => void;
+  // Subscribe to live "this game changed" pushes (round scored, player joined, finished). Returns an
+  // unsubscribe. Used by the game page so scores update in real time for every participant.
+  subscribeGame: (gameId: number, cb: () => void) => () => void;
 };
 
 const InvitationsCtx = createContext<Ctx | null>(null);
@@ -37,6 +40,24 @@ export function InvitationsProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<string | null>(null);
 
   const refresh = useCallback(() => setNonce((n) => n + 1), []);
+
+  // Per-game "changed" listeners (the game page registers one to reload live).
+  const gameListeners = useRef(new Map<number, Set<() => void>>());
+  const subscribeGame = useCallback((gameId: number, cb: () => void) => {
+    let set = gameListeners.current.get(gameId);
+    if (!set) {
+      set = new Set();
+      gameListeners.current.set(gameId, set);
+    }
+    set.add(cb);
+    return () => {
+      const s = gameListeners.current.get(gameId);
+      if (s) {
+        s.delete(cb);
+        if (!s.size) gameListeners.current.delete(gameId);
+      }
+    };
+  }, []);
 
   // keep the latest token getter without re-running the stream effect
   const tokenRef = useRef(getAccessToken);
@@ -92,6 +113,8 @@ export function InvitationsProvider({ children }: { children: ReactNode }) {
                 if (evt.type === "invitation.created") {
                   setNonce((n) => n + 1); // re-pull the authoritative list (badge bumps)
                   setToast(evt.inviter_name || t("invites.someone"));
+                } else if (evt.type === "game.updated") {
+                  gameListeners.current.get(evt.game_id)?.forEach((fn) => fn());
                 }
               } catch {
                 /* ignore malformed frame */
@@ -114,7 +137,10 @@ export function InvitationsProvider({ children }: { children: ReactNode }) {
     };
   }, [t]);
 
-  const value = useMemo<Ctx>(() => ({ invites, loading, refresh }), [invites, loading, refresh]);
+  const value = useMemo<Ctx>(
+    () => ({ invites, loading, refresh, subscribeGame }),
+    [invites, loading, refresh, subscribeGame],
+  );
 
   return (
     <InvitationsCtx.Provider value={value}>

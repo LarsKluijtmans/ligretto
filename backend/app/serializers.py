@@ -50,7 +50,7 @@ def to_summary(game: Game) -> GameSummary:
     )
 
 
-def to_detail(game: Game) -> GameDetail:
+def to_detail(game: Game, viewer_player_id: int | None = None) -> GameDetail:
     totals = _totals(game)
     leader_ids = scoring.leaders(totals)
     leader_name = _name_for(game, leader_ids[0]) if len(leader_ids) == 1 else None
@@ -100,4 +100,5 @@ def to_detail(game: Game) -> GameDetail:
         leader_name=leader_name,
         winner=game.winner_game_player_id,
         game_over=game_over,
+        is_host=viewer_player_id is not None and game.host_player_id == viewer_player_id,
     )
