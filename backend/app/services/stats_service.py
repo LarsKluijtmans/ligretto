@@ -17,11 +17,15 @@ class StatsService:
 
     def me(self, player_id: int) -> StatsOut:
         # Games the caller HOSTED or ACCEPTED (intent 002) — so an invited player's stats span every
-        # game they joined, not only games they hosted.
+        # game they joined, not only games they hosted. We include ACTIVE games too, not just completed:
+        # endless mode is the default (games stay 'active' until finished), so a completed-only view left
+        # most players with all-zero stats and a hidden stats hero. avg score + best round now reflect
+        # in-progress play (a live game counts its running total); wins/win rate stay over finished games
+        # (an unfinished game has no winner yet).
         games: list[Game] = self.games.list_for_player(
-            player_id, statuses=["completed"]
+            player_id, statuses=["active", "completed"]
         )
-        games_played = len(games)
+        completed = sum(1 for g in games if g.status == "completed")
         wins = 0
         round_scores: list[int] = []
         game_totals: list[int] = []
@@ -32,27 +36,31 @@ class StatsService:
             my_seat_ids = {
                 gp.id for gp in game.players if gp.player_id == player_id
             }
+            # winner_game_player_id is only set on a completed game, so this counts finished wins only.
             if game.winner_game_player_id in my_seat_ids:
                 wins += 1
 
             my_total = 0
-            has_seat = bool(my_seat_ids)
+            scored = False
             for rnd in game.rounds:
                 for sc in rnd.scores:
                     if sc.game_player_id in my_seat_ids:
                         round_scores.append(sc.computed_score)
                         my_total += sc.computed_score
                         best_round = max(best_round, sc.computed_score)
-            if has_seat:
+                        scored = True
+            # Only games where I actually have scored rounds feed the average, so a freshly-created
+            # (unscored) game doesn't drag it toward zero.
+            if scored:
                 game_totals.append(my_total)
 
-        win_rate = (wins / games_played) if games_played else 0.0
+        win_rate = (wins / completed) if completed else 0.0
         avg_score = (sum(game_totals) / len(game_totals)) if game_totals else 0.0
         if not round_scores:
             best_round = 0
 
         return StatsOut(
-            games_played=games_played,
+            games_played=completed,
             wins=wins,
             win_rate=round(win_rate, 4),
             avg_score=round(avg_score, 2),

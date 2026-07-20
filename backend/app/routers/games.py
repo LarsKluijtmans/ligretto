@@ -52,7 +52,8 @@ def create_game(
         "game_created",
         subject=me.sub,
         project_id=principal.project_id,
-        metadata={"game_id": game.id, "players": len(game.players), "target_type": game.target_type},
+        reference_1=game.target_type,            # game mode (endless/rounds/points) — the groupable segment
+        metadata={"game_id": game.id, "players": len(game.players), "target_value": game.target_value},
     )
     return to_detail(game, me.id)
 
@@ -137,7 +138,9 @@ def finish_game(
         "game_finished",
         subject=me.sub,
         project_id=principal.project_id,
-        metadata={"game_id": game.id, "rounds": len(game.rounds)},
+        reference_1=game.target_type,            # game mode — the groupable segment
+        quantity=max(len(game.rounds), 1),       # meter rounds played (platform requires quantity >= 1)
+        metadata={"game_id": game.id, "players": len(game.players)},
     )
     return to_detail(game, me.id)
 
@@ -157,6 +160,8 @@ def abandon_game(
         "game_abandoned",
         subject=me.sub,
         project_id=principal.project_id,
-        metadata={"game_id": game.id, "rounds": len(game.rounds)},
+        reference_1=game.target_type,            # game mode — the groupable segment
+        quantity=max(len(game.rounds), 1),       # meter rounds played before abandoning (>= 1)
+        metadata={"game_id": game.id, "players": len(game.players)},
     )
     return to_detail(game, me.id)

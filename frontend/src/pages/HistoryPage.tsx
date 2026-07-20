@@ -58,7 +58,10 @@ export function HistoryPage() {
         </Typography>
       </Box>
 
-      {stats && stats.games_played > 0 && <StatsHero stats={stats} />}
+      {/* Show the lifetime-stats hero whenever the player has any games (active or completed). Gating on
+          completed games alone hid it for everyone playing endless mode (the default), where games stay
+          active — the stats themselves now span active games too (see StatsService.me). */}
+      {stats && items.length > 0 && <StatsHero stats={stats} />}
 
       <AsyncBoundary
         loading={loading && items.length === 0}
